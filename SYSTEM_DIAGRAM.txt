@@ -1,0 +1,148 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║              PORTFOLIO MANAGEMENT APPLICATION WITH AI - ARCHITECTURE          ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           CLIENT APPLICATIONS                                │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐       │
+│  │   Web App   │  │  Mobile App │  │  CLI Tool   │  │  3rd Party  │       │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘       │
+│         │                 │                 │                 │              │
+│         └─────────────────┴─────────────────┴─────────────────┘              │
+│                                     │                                         │
+└─────────────────────────────────────┼─────────────────────────────────────────┘
+                                      │
+                                      │ HTTP/REST
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          API LAYER (FastAPI)                                 │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │                           REST Endpoints                              │  │
+│  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐   │  │
+│  │  │   Users     │ │ Portfolios  │ │   Assets    │ │  Analysis   │   │  │
+│  │  │   /users    │ │ /portfolios │ │  /assets    │ │  /analysis  │   │  │
+│  │  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘   │  │
+│  └──────────────────────────────────────────────────────────────────────┘  │
+│                                     │                                        │
+│  ┌──────────────────────────────────┼────────────────────────────────────┐ │
+│  │            Request Validation (Pydantic Schemas)                      │ │
+│  └──────────────────────────────────┬────────────────────────────────────┘ │
+└─────────────────────────────────────┼──────────────────────────────────────┘
+                                      │
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     BUSINESS LOGIC LAYER (Services)                          │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │  ┌──────────────────────┐        ┌──────────────────────┐           │  │
+│  │  │  Portfolio Service   │        │  Market Data Service │           │  │
+│  │  │  - Create portfolio  │        │  - Fetch prices      │           │  │
+│  │  │  - Add assets        │        │  - Get asset info    │           │  │
+│  │  │  - Get holdings      │        │  - Historical data   │           │  │
+│  │  │  - Calculate value   │        │  - Update prices     │           │  │
+│  │  └──────────────────────┘        └──────────────────────┘           │  │
+│  └──────────────────────────────────────────────────────────────────────┘  │
+│                          │                           │                       │
+│                          ▼                           ▼                       │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │                       AI/ML LAYER                                     │  │
+│  │  ┌────────────────────────────────────────────────────────────────┐  │  │
+│  │  │            Portfolio Optimizer (AI Engine)                     │  │  │
+│  │  │  ┌────────────────────┐  ┌────────────────────┐               │  │  │
+│  │  │  │  Modern Portfolio  │  │  Risk Assessment   │               │  │  │
+│  │  │  │  Theory (MPT)      │  │  - Volatility      │               │  │  │
+│  │  │  │  - Mean-Variance   │  │  - Sharpe Ratio    │               │  │  │
+│  │  │  │  - Optimization    │  │  - Risk Level      │               │  │  │
+│  │  │  └────────────────────┘  └────────────────────┘               │  │  │
+│  │  │  ┌────────────────────┐  ┌────────────────────┐               │  │  │
+│  │  │  │  Ledoit-Wolf       │  │  Smart             │               │  │  │
+│  │  │  │  Covariance        │  │  Recommendations   │               │  │  │
+│  │  │  │  Estimation        │  │  Generation        │               │  │  │
+│  │  │  └────────────────────┘  └────────────────────┘               │  │  │
+│  │  └────────────────────────────────────────────────────────────────┘  │  │
+│  └──────────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────┬───────────────────────────────────────┘
+                                      │
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        DATA LAYER (SQLAlchemy ORM)                           │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │                          Data Models                                  │  │
+│  │  ┌─────────┐   ┌─────────────┐   ┌─────────┐   ┌──────────────┐    │  │
+│  │  │  User   │───│  Portfolio  │───│  Asset  │   │ Transaction  │    │  │
+│  │  │         │   │             │   │         │   │              │    │  │
+│  │  │ - id    │   │ - id        │   │ - id    │   │ - id         │    │  │
+│  │  │ - name  │   │ - name      │   │ - symbol│   │ - type       │    │  │
+│  │  │ - email │   │ - user_id   │   │ - price │   │ - quantity   │    │  │
+│  │  └─────────┘   └─────────────┘   └─────────┘   └──────────────┘    │  │
+│  └──────────────────────────────────────────────────────────────────────┘  │
+│                                     │                                        │
+│                                     ▼                                        │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │                    SQLite Database (Production: PostgreSQL)           │  │
+│  │                         portfolio.db                                  │  │
+│  └──────────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      ▲
+                                      │
+┌─────────────────────────────────────┴───────────────────────────────────────┐
+│                        EXTERNAL SERVICES                                     │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │                    Yahoo Finance API (yfinance)                       │  │
+│  │  - Real-time stock prices                                             │  │
+│  │  - Historical price data                                              │  │
+│  │  - Asset information (sector, industry, PE ratio, etc.)              │  │
+│  └──────────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                            DATA FLOW EXAMPLE                                  ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+PORTFOLIO ANALYSIS REQUEST:
+────────────────────────────────────────────────────────────────────────────────
+1. Client → GET /api/analysis/{portfolio_id}
+                     │
+2. API Layer → Validate request → Portfolio Service
+                     │
+3. Portfolio Service → Get holdings from Database
+                     │
+4. Market Data Service → Fetch prices from Yahoo Finance
+                     │
+5. AI Optimizer → Calculate returns, covariance, optimize allocation
+                     │
+6. Generate recommendations based on AI analysis
+                     │
+7. Return results → Client receives:
+   - Expected Return: 12%
+   - Volatility: 18%
+   - Sharpe Ratio: 0.56
+   - Risk Level: Medium
+   - Recommendations: ["Increase GOOGL by 5%", "Reduce AAPL by 3%", ...]
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                          TECHNOLOGY STACK                                     ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+Layer              │ Technology              │ Purpose
+───────────────────┼─────────────────────────┼─────────────────────────────────
+API Framework      │ FastAPI                 │ High-performance REST API
+ORM                │ SQLAlchemy              │ Database abstraction
+Database           │ SQLite/PostgreSQL       │ Data persistence
+ML Library         │ scikit-learn            │ Portfolio optimization
+Data Processing    │ pandas, NumPy, SciPy    │ Financial calculations
+Market Data        │ yfinance                │ Real-time/historical prices
+Authentication     │ passlib (bcrypt)        │ Password security
+Testing            │ pytest                  │ Automated testing
+Deployment         │ Docker, uvicorn         │ Containerization & server
+Documentation      │ OpenAPI (Swagger)       │ API documentation
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                          KEY METRICS                                          ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+Code               │ 1,295 lines of Python
+Files              │ 34 files across 9 directories
+API Endpoints      │ 13 RESTful endpoints
+AI Algorithms      │ 8+ optimization and analysis algorithms
+Test Cases         │ 10+ unit and integration tests
+Documentation      │ 7 comprehensive markdown files (43 KB)
