@@ -16,5 +16,17 @@
       "preLaunchTask": "npm: test",
       "url": "http://localhost:9876/debug.html"
     }
+    ,
+    {
+      "name": "Launch Frontend Container & Debug",
+      "type": "chrome",
+      "request": "launch",
+      "preLaunchTask": "docker:build-and-run-frontend",
+      "url": "http://localhost:4200/",
+      "webRoot": "${workspaceFolder}/src",
+      "sourceMaps": true,
+      "timeout": 20000,
+      "postDebugTask": "docker:stop-frontend"
+    }
   ]
 }
