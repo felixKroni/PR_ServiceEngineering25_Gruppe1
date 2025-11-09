@@ -1,0 +1,67 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "docker:stop-frontend",
+      "type": "shell",
+      "command": "try { docker rm -f newslytics-frontend } catch { }",
+      "problemMatcher": [],
+      "presentation": { "reveal": "silent" }
+    },
+    {
+      "label": "docker:build-frontend",
+      "type": "shell",
+      "command": "docker build -t newslytics-frontend:dev \"${workspaceFolder}\"",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always" }
+    },
+    {
+      "label": "docker:run-frontend",
+      "type": "shell",
+      "command": "docker run --name newslytics-frontend --rm -p 4200:4200 -e CHOKIDAR_USEPOLLING=true newslytics-frontend:dev",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "reveal": "always" }
+    },
+    {
+      "label": "docker:build-and-run-frontend",
+      "dependsOn": [
+        "docker:stop-frontend",
+        "docker:build-frontend",
+        "docker:run-frontend"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
+      "label": "npm: start",
+      "type": "npm",
+      "script": "start",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": "$tsc",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": { "regexp": "(.*?)" },
+          "endsPattern": { "regexp": "bundle generation complete" }
+        }
+      }
+    },
+    {
+      "label": "npm: test",
+      "type": "npm",
+      "script": "test",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": "$tsc",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": { "regexp": "(.*?)" },
+          "endsPattern": { "regexp": "bundle generation complete" }
+        }
+      }
+    }
+  ]
+}
