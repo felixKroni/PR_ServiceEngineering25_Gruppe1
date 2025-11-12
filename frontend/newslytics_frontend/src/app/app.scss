@@ -1,0 +1,146 @@
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  padding: 2rem 2rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header-title {
+  margin: 0 0 0.5rem;
+  font-size: 2.5rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.header-subtitle {
+  margin: 0;
+  font-size: 1.1rem;
+  opacity: 0.95;
+  font-weight: 300;
+}
+
+.navbar {
+  background-color: #1a1a2e;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.nav-brand {
+  .brand-link {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: #4a9eff;
+    }
+  }
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+
+  li {
+    a {
+      color: #e0e0e0;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: color 0.3s ease;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+
+      &:hover {
+        color: #ffffff;
+        background-color: rgba(74, 158, 255, 0.1);
+      }
+
+      &.active {
+        color: #4a9eff;
+        background-color: rgba(74, 158, 255, 0.2);
+      }
+    }
+  }
+}
+
+.main-content {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 400px);
+}
+
+.footer {
+  background-color: #1a1a2e;
+  color: #e0e0e0;
+  padding: 3rem 2rem 1.5rem;
+  margin-top: 4rem;
+  border-top: 3px solid #667eea;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.footer-section {
+  h3 {
+    color: #ffffff;
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+  }
+
+  h4 {
+    color: #ffffff;
+    margin: 0 0 1rem;
+    font-size: 1.2rem;
+  }
+
+  p {
+    margin: 0.5rem 0;
+    line-height: 1.6;
+    color: #b0b0b0;
+  }
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    margin-bottom: 0.5rem;
+
+    a {
+      color: #b0b0b0;
+      text-decoration: none;
+      transition: color 0.3s ease;
+
+      &:hover {
+        color: #4a9eff;
+      }
+    }
+  }
+}
