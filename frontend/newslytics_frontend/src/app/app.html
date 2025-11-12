@@ -1,4 +1,36 @@
 
 
 
-<router-outlet />
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-brand">
+      <a routerLink="/home" class="brand-link">Newslytics</a>
+    </div>
+    <ul class="nav-links">
+      <li>
+        <a routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+          Home
+        </a>
+      </li>
+      <li>
+        <a routerLink="/dashboard" routerLinkActive="active">
+          Dashboard
+        </a>
+      </li>
+      <li>
+        <a routerLink="/portfolios" routerLinkActive="active">
+          Portfolios
+        </a>
+      </li>
+      <li>
+        <a routerLink="/stocks" routerLinkActive="active">
+          Stocks
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<main class="main-content">
+  <router-outlet />
+</main>
