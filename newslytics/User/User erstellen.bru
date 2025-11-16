@@ -1,0 +1,20 @@
+meta {
+  name: User erstellen
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:5001/api/users
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "max1",
+    "firstname": "Max",
+    "lastname": "Mustermann",
+    "password": "pass123"
+  }
+}

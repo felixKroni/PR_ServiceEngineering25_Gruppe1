@@ -1,0 +1,294 @@
+from datetime import date
+
+from flask import Blueprint, request, jsonify, abort
+
+from .models import (
+    db,
+    User,
+    Portfolio,
+    Aktie,
+    Watchlist,
+    Transaktion,
+    Chatverlauf,
+    ChatEntry,
+    ChatTypeEnum,
+    SenderEnum,
+)
+
+api_bp = Blueprint("api", __name__)
+
+
+# ------- Helper -------
+
+def get_json():
+    if not request.is_json:
+        abort(400, description="Request must be JSON")
+    return request.get_json()
+
+
+# ======================
+#        USERS
+# ======================
+
+@api_bp.route("/users", methods=["GET", "POST"])
+def users_collection():
+    if request.method == "POST":
+        data = get_json()
+        user = User(
+            username=data["username"],
+            firstname=data["firstname"],
+            lastname=data["lastname"],
+            password=data["password"],
+        )
+        db.session.add(user)
+        db.session.commit()
+        return jsonify(user.to_dict()), 201
+
+    users = User.query.all()
+    return jsonify([u.to_dict() for u in users])
+
+
+@api_bp.route("/users/<int:user_id>", methods=["GET", "DELETE"])
+def user_detail(user_id):
+    user = User.query.get_or_404(user_id)
+
+    if request.method == "GET":
+        return jsonify(user.to_dict())
+
+    # DELETE
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify({"message": f"User {user_id} deleted"}), 200
+
+
+# ======================
+#      PORTFOLIOS
+# ======================
+
+@api_bp.route("/portfolios", methods=["GET", "POST"])
+def portfolios_collection():
+    if request.method == "POST":
+        data = get_json()
+        portfolio = Portfolio(
+            name=data["name"],
+            user_id=data["user_id"],
+        )
+        db.session.add(portfolio)
+        db.session.commit()
+        return jsonify(portfolio.to_dict()), 201
+
+    portfolios = Portfolio.query.all()
+    return jsonify([p.to_dict() for p in portfolios])
+
+
+@api_bp.route("/portfolios/<int:portfolio_id>", methods=["GET", "DELETE"])
+def portfolio_detail(portfolio_id):
+    portfolio = Portfolio.query.get_or_404(portfolio_id)
+
+    if request.method == "GET":
+        return jsonify(portfolio.to_dict())
+
+    # DELETE
+    db.session.delete(portfolio)
+    db.session.commit()
+    return jsonify({"message": f"Portfolio {portfolio_id} deleted"}), 200
+
+
+@api_bp.route("/users/<int:user_id>/portfolios", methods=["GET"])
+def portfolios_of_user(user_id):
+    # 404, falls User nicht existiert
+    User.query.get_or_404(user_id)
+
+    portfolios = Portfolio.query.filter_by(user_id=user_id).all()
+    return jsonify([p.to_dict() for p in portfolios])
+
+
+# ======================
+#        AKTIEN
+# ======================
+
+@api_bp.route("/aktien", methods=["GET", "POST"])
+def aktien_collection():
+    if request.method == "POST":
+        data = get_json()
+        aktie = Aktie(
+            name=data["name"],
+            isin=data["isin"],
+            firma=data.get("firma", ""),
+            ausschüttungsart=data.get("ausschüttungsart"),
+            kategorie=data.get("kategorie"),
+            land=data.get("land"),
+            beschreibung=data.get("beschreibung"),
+            ebitda=data.get("ebitda"),
+            nettogewinn=data.get("nettogewinn"),
+            umsatz=data.get("umsatz"),
+            currency=data.get("currency"),
+            unternehmenswert=data.get("unternehmenswert"),
+        )
+        db.session.add(aktie)
+        db.session.commit()
+        return jsonify(aktie.to_dict()), 201
+
+    aktien = Aktie.query.all()
+    return jsonify([a.to_dict() for a in aktien])
+
+
+@api_bp.route("/aktien/<int:aktie_id>", methods=["GET", "DELETE"])
+def aktie_detail(aktie_id):
+    aktie = Aktie.query.get_or_404(aktie_id)
+
+    if request.method == "GET":
+        return jsonify(aktie.to_dict())
+
+    # DELETE
+    db.session.delete(aktie)
+    db.session.commit()
+    return jsonify({"message": f"Aktie {aktie_id} deleted"}), 200
+
+
+# ======================
+#       WATCHLIST
+# ======================
+
+@api_bp.route("/watchlist", methods=["GET", "POST"])
+def watchlist_collection():
+    if request.method == "POST":
+        data = get_json()
+        entry = Watchlist(
+            user_id=data["user_id"],
+            aktie_id=data["aktie_id"],
+        )
+        db.session.add(entry)
+        db.session.commit()
+        return jsonify(entry.to_dict()), 201
+
+    entries = Watchlist.query.all()
+    return jsonify([e.to_dict() for e in entries])
+
+
+@api_bp.route("/watchlist/<int:entry_id>", methods=["DELETE"])
+def watchlist_detail(entry_id):
+    entry = Watchlist.query.get_or_404(entry_id)
+    db.session.delete(entry)
+    db.session.commit()
+    return jsonify({"message": f"Watchlist entry {entry_id} deleted"}), 200
+
+
+@api_bp.route("/watchlist/user/<int:user_id>", methods=["GET"])
+def watchlist_of_user(user_id):
+    # 404, falls User nicht existiert
+    User.query.get_or_404(user_id)
+
+    entries = Watchlist.query.filter_by(user_id=user_id).all()
+    return jsonify([e.to_dict() for e in entries])
+
+
+# ======================
+#     TRANSAKTIONEN
+# ======================
+
+@api_bp.route("/transaktionen", methods=["GET", "POST"])
+def transaktionen_collection():
+    if request.method == "POST":
+        data = get_json()
+
+        kaufdatum = date.fromisoformat(data["kaufdatum"])
+
+        tx = Transaktion(
+            menge=data["menge"],
+            kaufpreis=data["kaufpreis"],
+            kaufdatum=kaufdatum,
+            aktie_id=data["aktie_id"],
+            portfolio_id=data["portfolio_id"],
+        )
+        db.session.add(tx)
+        db.session.commit()
+        return jsonify(tx.to_dict()), 201
+
+    txs = Transaktion.query.all()
+    return jsonify([t.to_dict() for t in txs])
+
+
+@api_bp.route("/transaktionen/<int:tx_id>", methods=["DELETE"])
+def transaktion_detail(tx_id):
+    tx = Transaktion.query.get_or_404(tx_id)
+    db.session.delete(tx)
+    db.session.commit()
+    return jsonify({"message": f"Transaktion {tx_id} deleted"}), 200
+
+
+@api_bp.route("/portfolios/<int:portfolio_id>/transaktionen", methods=["GET"])
+def transaktionen_of_portfolio(portfolio_id):
+    # 404, falls Portfolio nicht existiert
+    Portfolio.query.get_or_404(portfolio_id)
+
+    txs = Transaktion.query.filter_by(portfolio_id=portfolio_id).all()
+    return jsonify([t.to_dict() for t in txs])
+
+
+# ======================
+#        CHATS
+# ======================
+
+@api_bp.route("/chats", methods=["GET", "POST"])
+def chats_collection():
+    if request.method == "POST":
+        data = get_json()
+        chat_type = ChatTypeEnum(data["type"])
+        chat = Chatverlauf(
+            type=chat_type,
+            foreign_id=data["foreign_id"],
+            user_id=data["user_id"],
+        )
+        db.session.add(chat)
+        db.session.commit()
+        return jsonify(chat.to_dict()), 201
+
+    chats = Chatverlauf.query.all()
+    return jsonify([c.to_dict() for c in chats])
+
+
+@api_bp.route("/chats/<int:chat_id>", methods=["DELETE"])
+def chat_detail(chat_id):
+    chat = Chatverlauf.query.get_or_404(chat_id)
+    db.session.delete(chat)
+    db.session.commit()
+    return jsonify({"message": f"Chat {chat_id} deleted"}), 200
+
+
+# ======================
+#      CHAT ENTRIES
+# ======================
+
+@api_bp.route("/chats/<int:chat_id>/entries", methods=["GET", "POST"])
+def chat_entries_collection(chat_id):
+    chat = Chatverlauf.query.get_or_404(chat_id)
+
+    if request.method == "POST":
+        data = get_json()
+        sender = SenderEnum(data["sender"])
+        entry = ChatEntry(
+            chat=chat,
+            sender=sender,
+            text=data["text"],
+        )
+        db.session.add(entry)
+        db.session.commit()
+        return jsonify(entry.to_dict()), 201
+
+    entries = ChatEntry.query.filter_by(chat_id=chat_id).order_by(ChatEntry.datetime).all()
+    return jsonify([e.to_dict() for e in entries])
+
+
+@api_bp.route("/chats/<int:chat_id>/entries/<int:entry_id>", methods=["DELETE"])
+def chat_entry_detail(chat_id, entry_id):
+    # sicherstellen, dass Chat existiert
+    Chatverlauf.query.get_or_404(chat_id)
+
+    entry = ChatEntry.query.filter_by(id=entry_id, chat_id=chat_id).first()
+    if entry is None:
+        abort(404, description="Chat entry not found")
+
+    db.session.delete(entry)
+    db.session.commit()
+    return jsonify({"message": f"Chat entry {entry_id} in chat {chat_id} deleted"}), 200

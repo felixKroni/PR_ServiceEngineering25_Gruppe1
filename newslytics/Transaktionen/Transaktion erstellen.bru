@@ -1,0 +1,22 @@
+meta {
+  name: Transaktion erstellen
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:5001/api/transaktionen
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "menge": 12.5,
+    "kaufpreis": 175.30,
+    "kaufdatum": "2024-10-21",
+    "aktie_id": 1,
+    "portfolio_id": 1
+  }
+  
+}

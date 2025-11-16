@@ -1,0 +1,18 @@
+meta {
+  name: Portfolio erstellen
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:5001/api/portfolios
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Langfrist-Portfolio",
+    "user_id": 2
+  }
+}

@@ -1,0 +1,29 @@
+meta {
+  name: Aktie erstellen
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:5001/api/aktien
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Apple Inc.",
+    "isin": "US0378331005",
+    "firma": "Apple Inc.",
+    "ausschüttungsart": "Dividende",
+    "kategorie": "Technologie",
+    "land": "USA",
+    "beschreibung": "US-Technologieunternehmen",
+    "ebitda": 123456789.12,
+    "nettogewinn": 109340000.00,
+    "umsatz": 383000000000,
+    "currency": "USD",
+    "unternehmenswert": 2900000000000
+  }
+  
+}
