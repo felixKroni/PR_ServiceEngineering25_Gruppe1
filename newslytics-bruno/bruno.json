@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "name": "newslytics",
+  "name": "newslytics-bruno",
   "type": "collection",
   "ignore": [
     "node_modules",

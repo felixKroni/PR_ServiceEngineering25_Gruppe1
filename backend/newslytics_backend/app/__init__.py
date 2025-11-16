@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 from .config import Config
-from .models import db  # nur db hier, Modelle später importieren
+from .models import db
 
 
 def create_app():
@@ -9,10 +9,8 @@ def create_app():
 
     db.init_app(app)
 
-    # Tabellen anlegen (für erste Tests ausreichend;
-    # in echten Projekten eher Flask-Migrate benutzen)
     with app.app_context():
-        from . import models  # noqa: F401
+        from . import models
         db.create_all()
 
     @app.route("/")

@@ -2,7 +2,6 @@ import os
 
 
 class Config:
-    # z.B. aus docker-compose
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "DATABASE_URL",
         "postgresql://postgres:postgres@db:5432/postgres",
