@@ -1,0 +1,22 @@
+<div class="modal-overlay" (click)="onOverlayClick($event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Login required</h2>
+      <button class="close-btn" type="button" (click)="close.emit()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <p>
+        To access this page you need to be logged in.
+      </p>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn-ghost" (click)="close.emit()">Close</button>
+      <div class="modal-actions-right">
+        <button type="button" class="btn-ghost" (click)="login.emit()">Login</button>
+        <button type="button" class="btn-primary" (click)="register.emit()">Register</button>
+      </div>
+    </div>
+  </div>
+</div>

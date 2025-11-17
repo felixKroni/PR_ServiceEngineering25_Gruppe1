@@ -8,7 +8,7 @@
     <div class="header-actions">
       <ng-container *ngIf="!isLoggedIn; else loggedInBlock">
         <button type="submit" class="btn-ghost" (click)="openLogin()">Login</button>
-        <button type="submit" class="btn-primary" (click)="openRegister()">Register</button>
+        <button type="submit" class="btn-primary" (click)="openRegister()">Register</button>        
       </ng-container>
       <ng-template #loggedInBlock>
         <span class="user-label">
@@ -22,7 +22,7 @@
 
 <app-login-modal (close)="closeLogin()" *ngIf="showLoginModal"></app-login-modal>
 <app-register-modal (close)="closeRegister()" *ngIf="showRegisterModal"></app-register-modal>
-
+<app-auth-required-modal *ngIf="showAuthRequiredModal" (close)="handleAuthRequiredClose()" (login)="handleAuthRequiredLogin()" (register)="handleAuthRequiredRegister()"> </app-auth-required-modal>
 <nav class="navbar">
   <div class="nav-container">
     <div class="nav-brand">

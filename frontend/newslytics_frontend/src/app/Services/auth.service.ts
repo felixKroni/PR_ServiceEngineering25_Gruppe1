@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, Subject, tap } from 'rxjs';
 import { User, LoginRequest, AuthResponse, RegisterRequest } from '../Models/auth';
 
 @Injectable({
@@ -11,6 +11,9 @@ export class AuthService {
 
     private _currentUser: User | null = null;
     private _token: string | null = null;
+
+    private authRequiredSubject = new Subject<void>();
+    authRequired$: Observable<void> = this.authRequiredSubject.asObservable();
 
     get currentUser(): User | null {
         return this._currentUser;
@@ -39,6 +42,14 @@ export class AuthService {
 
     register(payload: RegisterRequest): Observable<User> {
         return this.http.post<User>(`${this.baseUrl}/auth/register`, payload);
+    }
+
+    get isAuthenticated(): boolean {
+        return !!this._currentUser;
+    }
+
+    notifyAuthRequired(): void {
+        this.authRequiredSubject.next();
     }
 
     private handleAuthSuccess(res: AuthResponse): void {
