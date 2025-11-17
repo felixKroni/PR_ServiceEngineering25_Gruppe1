@@ -1,12 +1,27 @@
-
-
-
 <header class="header">
-  <div class="header-container">
-    <h1 class="header-title">Newslytics</h1>
-    <p class="header-subtitle">AI-Powered Portfolio & Stock Analysis</p>
+  <div class="header-wrapper">
+    <div class="header-container">
+      <h1 class="header-title">Newslytics</h1>
+      <p class="header-subtitle">AI-Powered Portfolio & Stock Analysis</p>
+    </div>
+
+    <div class="header-actions">
+      <ng-container *ngIf="!isLoggedIn; else loggedInBlock">
+        <button type="submit" class="btn-ghost" (click)="openLogin()">Login</button>
+        <button type="submit" class="btn-primary" (click)="openRegister()">Register</button>
+      </ng-container>
+      <ng-template #loggedInBlock>
+        <span class="user-label">
+          {{ (authService.currentUser?.firstname + ' ' + authService.currentUser?.lastname).trim() || authService.currentUser?.username }}
+        </span>
+        <button type="button" class="btn-ghost" (click)="logout()">Logout</button>
+      </ng-template>
+    </div>
   </div>
 </header>
+
+<app-login-modal (close)="closeLogin()" *ngIf="showLoginModal"></app-login-modal>
+<app-register-modal (close)="closeRegister()" *ngIf="showRegisterModal"></app-register-modal>
 
 <nav class="navbar">
   <div class="nav-container">
