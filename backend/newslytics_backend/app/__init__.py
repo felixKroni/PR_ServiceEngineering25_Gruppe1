@@ -1,13 +1,16 @@
 from flask import Flask, jsonify
 from .config import Config
 from .models import db
+from flask_jwt_extended import JWTManager
 
-#Test comment Florian
+jwt = JWTManager()
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
     db.init_app(app)
+    jwt.init_app(app)
 
     with app.app_context():
         from . import models
@@ -15,7 +18,7 @@ def create_app():
 
     @app.route("/")
     def index():
-        return jsonify({"message": "Flask Portfolio API is running"})
+        return jsonify({"message": "Flask Portfolio API sis running"})
 
     # API-Routen
     from .routes import api_bp

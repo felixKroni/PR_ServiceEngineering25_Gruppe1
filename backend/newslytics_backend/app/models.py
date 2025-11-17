@@ -3,6 +3,7 @@ import enum
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Enum as SAEnum, Numeric
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
@@ -46,6 +47,12 @@ class User(db.Model):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+
+    def set_password(self, raw_password: str):
+        self.password = generate_password_hash(raw_password)
+
+    def check_password(self, raw_password: str) -> bool:
+        return check_password_hash(self.password, raw_password)
 
     def to_dict(self):
         return {

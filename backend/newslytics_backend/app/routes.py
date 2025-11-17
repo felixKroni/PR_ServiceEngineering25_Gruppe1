@@ -15,6 +15,14 @@ from .models import (
     SenderEnum,
 )
 
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import (
+
+    create_access_token,
+    jwt_required,
+    get_jwt_identity,
+)
+
 api_bp = Blueprint("api", __name__)
 
 
@@ -25,11 +33,72 @@ def get_json():
         abort(400, description="Request must be JSON")
     return request.get_json()
 
+# ======================
+#        Auth (LOGIN Register)
+# ======================
+@api_bp.route("/auth/register", methods=["POST"])
+def register():
+    data = get_json()
+
+    required_fields = ["username", "firstname", "lastname", "password"]
+    missing = [f for f in required_fields if f not in data]
+    if missing:
+        abort(400, description=f"Missing fields: {', '.join(missing)}")
+
+    # Username darf nicht doppelt sein
+    if User.query.filter_by(username=data["username"]).first() is not None:
+        abort(400, description="Username already taken")
+
+    user = User(
+        username=data["username"],
+        firstname=data["firstname"],
+        lastname=data["lastname"],
+    )
+
+    user.password = generate_password_hash(data["password"])
+
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify(user.to_dict()), 201
+
+
+@api_bp.route("/auth/login", methods=["POST"])
+def login():
+    data = get_json()
+
+    if "username" not in data or "password" not in data:
+        abort(400, description="Username and password are required")
+
+    user = User.query.filter_by(username=data["username"]).first()
+    if user is None:
+        abort(401, description="Invalid credentials")
+
+    # Passwort prüfen
+    if not check_password_hash(user.password, data["password"]):
+        # oder: if not user.check_password(data["password"]):
+        abort(401, description="Invalid credentials")
+
+    # JWT generieren, Identity = user.id
+    access_token = create_access_token(identity=user.id)
+
+    return jsonify({
+        "access_token": access_token,
+        "user": user.to_dict(),
+    }), 200
+
+
+@api_bp.route("/auth/me", methods=["GET"])
+@jwt_required()
+def me():
+    current_user_id = get_jwt_identity()
+    user = User.query.get_or_404(current_user_id)
+    return jsonify(user.to_dict()), 200
+
 
 # ======================
 #        USERS
 # ======================
-
 @api_bp.route("/users", methods=["GET", "POST"])
 def users_collection():
     if request.method == "POST":
@@ -38,14 +107,18 @@ def users_collection():
             username=data["username"],
             firstname=data["firstname"],
             lastname=data["lastname"],
-            password=data["password"],
         )
+        # Passwort hashen:
+        user.password = generate_password_hash(data["password"])
+        # oder: user.set_password(data["password"])
+
         db.session.add(user)
         db.session.commit()
         return jsonify(user.to_dict()), 201
 
     users = User.query.all()
     return jsonify([u.to_dict() for u in users])
+
 
 
 @api_bp.route("/users/<int:user_id>", methods=["GET", "DELETE"])
