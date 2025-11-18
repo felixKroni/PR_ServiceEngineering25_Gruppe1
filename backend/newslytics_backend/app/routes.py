@@ -100,6 +100,7 @@ def me():
 #        USERS
 # ======================
 @api_bp.route("/users", methods=["GET", "POST"])
+@jwt_required()
 def users_collection():
     if request.method == "POST":
         data = get_json()
@@ -122,6 +123,7 @@ def users_collection():
 
 
 @api_bp.route("/users/<int:user_id>", methods=["GET", "DELETE"])
+@jwt_required()
 def user_detail(user_id):
     user = User.query.get_or_404(user_id)
 
@@ -139,6 +141,7 @@ def user_detail(user_id):
 # ======================
 
 @api_bp.route("/portfolios", methods=["GET", "POST"])
+@jwt_required()
 def portfolios_collection():
     if request.method == "POST":
         data = get_json()
@@ -155,6 +158,7 @@ def portfolios_collection():
 
 
 @api_bp.route("/portfolios/<int:portfolio_id>", methods=["GET", "DELETE"])
+@jwt_required()
 def portfolio_detail(portfolio_id):
     portfolio = Portfolio.query.get_or_404(portfolio_id)
 
@@ -168,6 +172,7 @@ def portfolio_detail(portfolio_id):
 
 
 @api_bp.route("/users/<int:user_id>/portfolios", methods=["GET"])
+@jwt_required()
 def portfolios_of_user(user_id):
     # 404, falls User nicht existiert
     User.query.get_or_404(user_id)
@@ -181,6 +186,7 @@ def portfolios_of_user(user_id):
 # ======================
 
 @api_bp.route("/aktien", methods=["GET", "POST"])
+@jwt_required()
 def aktien_collection():
     if request.method == "POST":
         data = get_json()
@@ -207,6 +213,7 @@ def aktien_collection():
 
 
 @api_bp.route("/aktien/<int:aktie_id>", methods=["GET", "DELETE"])
+@jwt_required()
 def aktie_detail(aktie_id):
     aktie = Aktie.query.get_or_404(aktie_id)
 
@@ -224,6 +231,7 @@ def aktie_detail(aktie_id):
 # ======================
 
 @api_bp.route("/watchlist", methods=["GET", "POST"])
+@jwt_required()
 def watchlist_collection():
     if request.method == "POST":
         data = get_json()
@@ -240,6 +248,7 @@ def watchlist_collection():
 
 
 @api_bp.route("/watchlist/<int:entry_id>", methods=["DELETE"])
+@jwt_required()
 def watchlist_detail(entry_id):
     entry = Watchlist.query.get_or_404(entry_id)
     db.session.delete(entry)
@@ -248,6 +257,7 @@ def watchlist_detail(entry_id):
 
 
 @api_bp.route("/watchlist/user/<int:user_id>", methods=["GET"])
+@jwt_required()
 def watchlist_of_user(user_id):
     # 404, falls User nicht existiert
     User.query.get_or_404(user_id)
@@ -261,6 +271,7 @@ def watchlist_of_user(user_id):
 # ======================
 
 @api_bp.route("/transaktionen", methods=["GET", "POST"])
+@jwt_required()
 def transaktionen_collection():
     if request.method == "POST":
         data = get_json()
@@ -283,6 +294,7 @@ def transaktionen_collection():
 
 
 @api_bp.route("/transaktionen/<int:tx_id>", methods=["DELETE"])
+@jwt_required()
 def transaktion_detail(tx_id):
     tx = Transaktion.query.get_or_404(tx_id)
     db.session.delete(tx)
@@ -291,6 +303,7 @@ def transaktion_detail(tx_id):
 
 
 @api_bp.route("/portfolios/<int:portfolio_id>/transaktionen", methods=["GET"])
+@jwt_required()
 def transaktionen_of_portfolio(portfolio_id):
     # 404, falls Portfolio nicht existiert
     Portfolio.query.get_or_404(portfolio_id)
@@ -304,6 +317,7 @@ def transaktionen_of_portfolio(portfolio_id):
 # ======================
 
 @api_bp.route("/chats", methods=["GET", "POST"])
+@jwt_required()
 def chats_collection():
     if request.method == "POST":
         data = get_json()
@@ -322,6 +336,7 @@ def chats_collection():
 
 
 @api_bp.route("/chats/<int:chat_id>", methods=["DELETE"])
+@jwt_required()
 def chat_detail(chat_id):
     chat = Chatverlauf.query.get_or_404(chat_id)
     db.session.delete(chat)
@@ -334,6 +349,7 @@ def chat_detail(chat_id):
 # ======================
 
 @api_bp.route("/chats/<int:chat_id>/entries", methods=["GET", "POST"])
+@jwt_required()
 def chat_entries_collection(chat_id):
     chat = Chatverlauf.query.get_or_404(chat_id)
 
@@ -354,6 +370,7 @@ def chat_entries_collection(chat_id):
 
 
 @api_bp.route("/chats/<int:chat_id>/entries/<int:entry_id>", methods=["DELETE"])
+@jwt_required()
 def chat_entry_detail(chat_id, entry_id):
     # sicherstellen, dass Chat existiert
     Chatverlauf.query.get_or_404(chat_id)
