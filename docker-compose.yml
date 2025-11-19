@@ -1,0 +1,69 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend/newslytics_backend
+    container_name: newslytics-backend
+    command: flask run --host=0.0.0.0 --port=5000
+    ports:
+      - "5001:5000"
+    environment:
+      DATABASE_URL: postgresql://admin:admin@db:5432/newslytics
+      SECRET_KEY: super-secret-key
+      FLASK_APP: app/__init__.py
+      FLASK_RUN_HOST: 0.0.0.0
+      FLASK_RUN_PORT: 5000
+    depends_on:
+      - db
+    networks:
+      - newslytics-network
+
+  frontend:
+    build: ./frontend/newslytics_frontend
+    container_name: newslytics-frontend
+    ports:
+      - "4200:4200"
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./frontend/newslytics_frontend/src:/app/src
+    depends_on:
+      - backend
+    networks:
+      - newslytics-network
+
+  db:
+    image: postgres:16
+    container_name: newslytics-db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: newslytics
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - newslytics-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: newslytics-pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - newslytics-network
+
+volumes:
+  postgres_data:
+
+networks:
+  newslytics-network:
+    driver: bridge
