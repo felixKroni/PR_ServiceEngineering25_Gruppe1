@@ -1,8 +1,24 @@
-<a class="portfolio-placeholder" [routerLink]="['/portfolio', portfolio.id]">
-    <header>
-        <h3>{{ portfolio.name }}</h3>
+<article class="portfolio-placeholder fluent-tile" (click)="openPortfolio()">
+    <div class="tile-header">
+        <div>
+            <p class="tile-eyebrow">Portfolio</p>
+            <h3>{{ portfolio.name }}</h3>
+        </div>
         <span class="portfolio-id">#{{ portfolio.id }}</span>
-    </header>
-    <p class="portfolio-meta">User ID: {{ portfolio.user_id }}</p>
+    </div>
     <p class="portfolio-description">Placeholder</p>
-</a>
+
+    <footer class="tile-actions">
+        <div class="left">
+            <button type="button" class="ghost primary" (click)="openPortfolio(); $event.stopPropagation()">Öffnen</button>
+        </div>
+        <div class="right">
+            <button type="button" class="ghost" [disabled]="renaming" (click)="requestRename(); $event.stopPropagation()">
+                {{ renaming ? 'Speichere …' : 'Umbenennen' }}
+            </button>
+            <button type="button" class="destructive" [disabled]="deleting" (click)="requestDelete(); $event.stopPropagation()">
+                {{ deleting ? 'Lösche …' : 'Löschen' }}
+            </button>
+        </div>
+    </footer>
+</article>

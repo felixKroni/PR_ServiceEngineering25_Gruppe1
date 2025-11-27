@@ -1,43 +1,23 @@
+
 .portfolio-placeholder {
-    border: 1px dashed #ccc;
-    border-radius: 8px;
-    padding: 1rem;
-    background-color: #fafafa;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    text-decoration: none;
-    color: inherit;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-
-    &:hover {
-        border-color: #7dd3fc;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-    }
-
-    header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        h3 {
-            margin: 0;
-            font-size: 1.1rem;
-        }
-        .portfolio-id {
-            font-size: 0.85rem;
-            color: #777;
-        }
-    }
-
     .portfolio-meta {
         margin: 0;
         font-size: 0.9rem;
-        color: #555;
+        color: #cbd5f5;
     }
 
     .portfolio-description {
         margin: 0;
         font-size: 0.85rem;
-        color: #999;
+        color: #94a3b8;
     }
+}
+
+.fluent-tile {
+    position: relative;
+    cursor: pointer;
+}
+
+.fluent-tile button {
+    cursor: pointer;
 }

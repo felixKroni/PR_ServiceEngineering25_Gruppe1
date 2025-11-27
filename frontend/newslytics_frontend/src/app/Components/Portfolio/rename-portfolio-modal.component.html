@@ -1,0 +1,22 @@
+<div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Portfolio umbenennen</h2>
+            <button class="close-btn" type="button" (click)="close.emit()">×</button>
+        </div>
+
+        <form (ngSubmit)="submit()">
+            <label>
+                Neuer Name
+                <input type="text" [(ngModel)]="name" name="name" required />
+            </label>
+
+            <button type="submit" [disabled]="saving">
+                {{ saving ? 'Speichere …' : 'Speichern' }}
+            </button>
+
+            <p class="error" *ngIf="validationError">{{ validationError }}</p>
+            <p class="error" *ngIf="serverError">{{ serverError }}</p>
+        </form>
+    </div>
+</div>

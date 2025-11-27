@@ -9,23 +9,33 @@
 		align-items: center;
 		justify-content: space-between;
 		button.primary {
-			border: none;
-			border-radius: 6px;
-			padding: 0.45rem 0.95rem;
+			border: 1px solid rgba(99, 102, 241, 0.5);
+			border-radius: 8px;
+			padding: 0.5rem 1.1rem;
 			font-weight: 600;
 			cursor: pointer;
-			background: linear-gradient(90deg, #34d399, #10b981);
-			color: #041019;
+			background: linear-gradient(120deg, #6366f1, #8b5cf6);
+			color: #f8fafc;
+			box-shadow: 0 8px 18px rgba(99, 102, 241, 0.35);
+			transition: transform 0.1s ease, box-shadow 0.1s ease;
+
+			&:hover {
+				transform: translateY(-1px);
+				box-shadow: 0 12px 24px rgba(99, 102, 241, 0.45);
+			}
 		}
 	}
 
 	.state {
 		padding: 0.75rem 1rem;
-		border-radius: 6px;
-		background-color: #f6f6f6;
+		border-radius: 8px;
+		background: var(--state-bg, #f6f6f6);
+		color: var(--state-color, #0f172a);
+		border: var(--state-border, none);
 		&.error {
-			background-color: #ffe5e5;
-			color: #a40000;
+			--state-bg: #ffe5e5;
+			--state-color: #a40000;
+			--state-border: 1px solid rgba(164, 0, 0, 0.25);
 		}
 	}
 

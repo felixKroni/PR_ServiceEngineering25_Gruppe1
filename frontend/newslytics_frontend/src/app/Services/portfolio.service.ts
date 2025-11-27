@@ -27,6 +27,10 @@ export class PortfolioService {
 		return this.http.post<Portfolio>(`${this.baseUrl}/portfolios`, payload);
 	}
 
+	renamePortfolio(id: number, name: string): Observable<Portfolio> {
+		return this.http.put<Portfolio>(`${this.baseUrl}/portfolios/${id}`, { name });
+	}
+
 	deletePortfolio(id: number): Observable<{ message: string }> {
 		return this.http.delete<{ message: string }>(`${this.baseUrl}/portfolios/${id}`);
 	}
