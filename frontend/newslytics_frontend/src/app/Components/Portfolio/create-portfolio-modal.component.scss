@@ -25,7 +25,12 @@ form {
         border: none;
         cursor: pointer;
         font-weight: 600;
-        background: linear-gradient(to right, #6366f1, #8b5cf6);
+        background: linear-gradient(to right, #10b981, #059669);
         color: white;
+    }
+
+    .error {
+        color: #fecaca;
+        font-size: 0.85rem;
     }
 }

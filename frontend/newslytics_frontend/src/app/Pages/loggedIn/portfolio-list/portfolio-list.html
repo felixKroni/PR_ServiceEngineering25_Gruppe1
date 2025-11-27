@@ -1,1 +1,27 @@
-<p>portfolio-list works!</p>
+<section class="portfolio-list">
+	<header>
+		<h2>Meine Portfolios</h2>
+		<button type="button" class="primary" (click)="openCreateModal()">
+			Portfolio erstellen
+		</button>
+	</header>
+
+	<app-create-portfolio-modal
+		*ngIf="showCreateModal"
+		(close)="closeCreateModal()"
+		(created)="handlePortfolioCreated($event)">
+	</app-create-portfolio-modal>
+
+	<div class="state" *ngIf="isLoading">Portfolios werden geladen ...</div>
+	<div class="state error" *ngIf="!isLoading && error">{{ error }}</div>
+	<div class="state" *ngIf="!isLoading && !error && portfolios.length === 0">
+		Noch keine Portfolios vorhanden.
+	</div>
+
+	<div class="portfolio-grid" *ngIf="!isLoading && !error && portfolios.length > 0">
+		<app-portfolio-placeholder
+			*ngFor="let portfolio of portfolios"
+			[portfolio]="portfolio">
+		</app-portfolio-placeholder>
+	</div>
+</section>

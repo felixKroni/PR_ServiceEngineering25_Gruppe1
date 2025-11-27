@@ -80,7 +80,7 @@ def login():
         abort(401, description="Invalid credentials")
 
     # JWT generieren, Identity = user.id
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity=str(user.id))
 
     return jsonify({
         "access_token": access_token,
@@ -91,7 +91,7 @@ def login():
 @api_bp.route("/auth/me", methods=["GET"])
 @jwt_required()
 def me():
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get_or_404(current_user_id)
     return jsonify(user.to_dict()), 200
 

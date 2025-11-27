@@ -1,1 +1,7 @@
-<p>portfolio-overview works!</p>
+<section class="portfolio-overview">
+	<p *ngIf="isLoading">Portfolio wird geladen ...</p>
+	<p *ngIf="!isLoading && error" class="error">{{ error }}</p>
+	<p *ngIf="!isLoading && !error">
+		Loaded: {{ portfolio?.name ?? 'NAME' }}
+	</p>
+</section>

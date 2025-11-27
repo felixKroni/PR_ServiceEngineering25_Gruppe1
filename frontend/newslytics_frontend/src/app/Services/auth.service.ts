@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject, tap } from 'rxjs';
 import { User, LoginRequest, AuthResponse, RegisterRequest } from '../Models/auth';
+import { environment } from '../config';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AuthService {
-    private readonly baseUrl = 'http://localhost:5001/api';
+    private readonly baseUrl = environment.apiBaseUrl;
 
     private _currentUser: User | null = null;
     private _token: string | null = null;
