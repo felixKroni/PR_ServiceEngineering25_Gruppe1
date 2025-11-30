@@ -7,7 +7,11 @@ meta {
 post {
   url: http://localhost:5001/api/aktien
   body: json
-  auth: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2NDUwMjk4OSwianRpIjoiZjY0NmM2MjMtZDE3NC00NjM0LWExYTgtNjQ3YTFhMWQxY2ZhIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzY0NTAyOTg5LCJjc3JmIjoiYWZlMzY3YjgtMjU3Ni00MjA0LTkyYjctYmE4YTBjMTFmZjFlIiwiZXhwIjoxNzY0NTA2NTg5fQ.HRGP5pTjOZVeBmqBvB9ffF20f4yLU8smhamiOMVNwNI
 }
 
 body:json {
