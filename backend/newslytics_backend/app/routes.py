@@ -382,3 +382,4 @@ def chat_entry_detail(chat_id, entry_id):
     db.session.delete(entry)
     db.session.commit()
     return jsonify({"message": f"Chat entry {entry_id} in chat {chat_id} deleted"}), 200
+
