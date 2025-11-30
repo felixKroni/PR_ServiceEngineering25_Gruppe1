@@ -1,6 +1,7 @@
 from datetime import date
 
 from flask import Blueprint, request, jsonify, abort
+from sqlalchemy import or_
 
 from .models import (
     db,
@@ -225,6 +226,40 @@ def aktie_detail(aktie_id):
     db.session.commit()
     return jsonify({"message": f"Aktie {aktie_id} deleted"}), 200
 
+# ---------- Search Endpoint für Aktien:
+@api_bp.route("/aktien/search", methods=["GET"])
+@jwt_required()
+def aktien_search():
+    """
+    Suche nach Aktien anhand eines Suchbegriffs.
+    Es werden Name, ISIN (Ticker) und Firma durchsucht.
+
+    Request:
+        GET /api/aktien/search?q=APPLE
+
+    Response:
+        [
+            { ...Aktie.to_dict()... },
+            ...
+        ]
+    """
+    query = request.args.get("q", "").strip()
+
+    if not query:
+        abort(400, description="Suchstring nicht übergeben!")
+
+    # Case-insensitive Suche mit LIKE
+    like_pattern = f"%{query}%"
+
+    results = Aktie.query.filter(
+        or_(
+            Aktie.name.ilike(like_pattern),
+            Aktie.isin.ilike(like_pattern),
+            Aktie.firma.ilike(like_pattern),
+        )
+    ).all()
+
+    return jsonify([a.to_dict() for a in results]), 200
 
 # ======================
 #       WATCHLIST

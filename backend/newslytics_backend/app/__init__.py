@@ -2,7 +2,7 @@ from flask import Flask, jsonify
 from .config import Config
 from .models import db
 from flask_jwt_extended import JWTManager
-from flask_cors import CORS 
+from flask_cors import CORS
 
 jwt = JWTManager()
 
@@ -21,7 +21,7 @@ def create_app():
 
     @app.route("/")
     def index():
-        return jsonify({"message": "Flask Portfolio API sis running"})
+        return jsonify({"message": "Flask Portfolio API is running"})
 
     # API-Routen
     from .routes import api_bp
