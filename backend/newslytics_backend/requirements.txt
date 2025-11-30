@@ -5,3 +5,4 @@ Flask_SQLAlchemy==3.1.1
 python-dotenv==1.0.1
 flask-jwt-extended
 flask-cors
+yfinance
