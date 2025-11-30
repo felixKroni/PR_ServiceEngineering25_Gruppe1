@@ -1,5 +1,5 @@
 from datetime import date
-
+import yfinance as yf
 from flask import Blueprint, request, jsonify, abort
 from sqlalchemy import or_
 
@@ -418,3 +418,76 @@ def chat_entry_detail(chat_id, entry_id):
     db.session.commit()
     return jsonify({"message": f"Chat entry {entry_id} in chat {chat_id} deleted"}), 200
 
+
+# ======================
+#      Market-Data
+# ======================
+@api_bp.route("/marketdata", methods=["GET"])
+@jwt_required()
+def marketdata():
+   
+    symbol = request.args.get("symbol")
+    if not symbol:
+        abort(400, description="Query parameter 'symbol' is required (e.g., AAPL, MSFT, BMW.DE).")
+
+    # Default values if not provided
+    period = request.args.get("range", "1mo")
+    interval = request.args.get("interval", "1d")
+
+    try:
+        ticker = yf.Ticker(symbol)
+        hist = ticker.history(period=period, interval=interval)
+    except Exception as e:
+        abort(500, description=f"Error fetching market data: {str(e)}")
+
+    if hist.empty:
+        abort(404, description=f"No market data found for symbol '{symbol}'.")
+
+    data = []
+    for ts, row in hist.iterrows():
+        data.append({
+            "datetime": ts.isoformat(),
+            "open": float(row["Open"]),
+            "high": float(row["High"]),
+            "low": float(row["Low"]),
+            "close": float(row["Close"]),
+            "volume": int(row["Volume"]) if not (row["Volume"] != row["Volume"]) else None,  # handle NaN
+        })
+
+    return jsonify({
+        "symbol": symbol,
+        "range": period,
+        "interval": interval,
+        "data": data,
+    }), 200
+
+@api_bp.route("/companyinfo", methods=["GET"])
+@jwt_required()
+def companyinfo():
+    symbol = request.args.get("symbol")
+    if not symbol:
+        abort(400, description="Query parameter 'symbol' is required (e.g., AAPL, MSFT, BMW.DE).")
+
+    try:
+        ticker = yf.Ticker(symbol)
+
+        info = {}
+
+        if hasattr(ticker, "info") and isinstance(ticker.info, dict):
+            info = ticker.info or {}
+        else:
+            basic = getattr(ticker, "basic_info", {}) or {}
+            fast = getattr(ticker, "fast_info", {}) or {}
+
+            info = {**basic, **fast}
+
+        if not info:
+            abort(404, description=f"No company data found for symbol '{symbol}'.")
+
+    except Exception as e:
+        abort(500, description=f"Error fetching company information: {str(e)}")
+
+    return jsonify({
+        "symbol": symbol,
+        "company_data": info
+    }), 200
