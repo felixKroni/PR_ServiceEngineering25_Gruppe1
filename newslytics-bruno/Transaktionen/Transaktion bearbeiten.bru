@@ -1,0 +1,22 @@
+meta {
+  name: Transaktion bearbeiten
+  type: http
+  seq: 5
+}
+
+put {
+  url: http://localhost:5001/api/transaktionen/1
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "aktie_id": 1,
+    "id": 1,
+    "kaufdatum": "2024-10-21",
+    "kaufpreis": 180.3,
+    "menge": 12.5,
+    "portfolio_id": 1
+  }
+}

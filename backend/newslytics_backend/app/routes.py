@@ -157,6 +157,25 @@ def portfolios_collection():
     portfolios = Portfolio.query.all()
     return jsonify([p.to_dict() for p in portfolios])
 
+@api_bp.route("/portfolios/<int:portfolio_id>", methods=["PUT"])
+@jwt_required()
+def update_portfolio(portfolio_id):
+    data = get_json()
+
+    # Portfolio suchen
+    portfolio = Portfolio.query.get_or_404(portfolio_id)
+
+    # Sicherstellen, dass der eingeloggte Benutzer nur seine eigenen Portfolios ändert
+    current_user_id = int(get_jwt_identity())
+    if portfolio.user_id != current_user_id:
+        return jsonify({"error": "Not authorized - Not your portfolio."}), 403
+
+    if "name" in data:
+        portfolio.name = data["name"]
+
+    db.session.commit()
+
+    return jsonify(portfolio.to_dict()), 200
 
 @api_bp.route("/portfolios/<int:portfolio_id>", methods=["GET", "DELETE"])
 @jwt_required()
@@ -212,6 +231,43 @@ def aktien_collection():
     aktien = Aktie.query.all()
     return jsonify([a.to_dict() for a in aktien])
 
+@api_bp.route("/aktien/<int:aktie_id>", methods=["PUT"])
+@jwt_required()
+def update_aktie(aktie_id):
+    data = get_json()
+
+    # Aktie laden oder 404
+    aktie = Aktie.query.get_or_404(aktie_id)
+
+    # Alle optionalen Felder updaten, falls vorhanden
+    if "name" in data:
+        aktie.name = data["name"]
+    if "isin" in data:
+        aktie.isin = data["isin"]
+    if "firma" in data:
+        aktie.firma = data["firma"]
+    if "ausschüttungsart" in data:
+        aktie.ausschüttungsart = data["ausschüttungsart"]
+    if "kategorie" in data:
+        aktie.kategorie = data["kategorie"]
+    if "land" in data:
+        aktie.land = data["land"]
+    if "beschreibung" in data:
+        aktie.beschreibung = data["beschreibung"]
+    if "ebitda" in data:
+        aktie.ebitda = data["ebitda"]
+    if "nettogewinn" in data:
+        aktie.nettogewinn = data["nettogewinn"]
+    if "umsatz" in data:
+        aktie.umsatz = data["umsatz"]
+    if "currency" in data:
+        aktie.currency = data["currency"]
+    if "unternehmenswert" in data:
+        aktie.unternehmenswert = data["unternehmenswert"]
+
+    db.session.commit()
+
+    return jsonify(aktie.to_dict()), 200
 
 @api_bp.route("/aktien/<int:aktie_id>", methods=["GET", "DELETE"])
 @jwt_required()
@@ -327,6 +383,38 @@ def transaktionen_collection():
     txs = Transaktion.query.all()
     return jsonify([t.to_dict() for t in txs])
 
+@api_bp.route("/transaktionen/<int:tx_id>", methods=["PUT"])
+@jwt_required()
+def update_transaktion(tx_id):
+    data = get_json()
+
+    # Transaktion finden oder 404
+    tx = Transaktion.query.get_or_404(tx_id)
+
+    # Der User darf nur Transaktionen in seinen eigenen Portfolios bearbeiten
+    current_user_id = int(get_jwt_identity())
+    if tx.portfolio.user_id != current_user_id:
+        return jsonify({"error": "Not authorized - Not your transaction."}), 403
+
+    # Felder aktualisieren, falls im Request enthalten
+    if "menge" in data:
+        tx.menge = data["menge"]
+
+    if "kaufpreis" in data:
+        tx.kaufpreis = data["kaufpreis"]
+
+    if "kaufdatum" in data:
+        tx.kaufdatum = date.fromisoformat(data["kaufdatum"])
+
+    if "aktie_id" in data:
+        tx.aktie_id = data["aktie_id"]
+
+    if "portfolio_id" in data:
+        tx.portfolio_id = data["portfolio_id"]
+
+    db.session.commit()
+
+    return jsonify(tx.to_dict()), 200
 
 @api_bp.route("/transaktionen/<int:tx_id>", methods=["DELETE"])
 @jwt_required()
@@ -460,6 +548,10 @@ def marketdata():
         "interval": interval,
         "data": data,
     }), 200
+
+# ======================
+#      Company-Info
+# ======================
 
 @api_bp.route("/companyinfo", methods=["GET"])
 @jwt_required()
