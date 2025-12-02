@@ -1,7 +1,8 @@
-from datetime import date
-import yfinance as yf
+from datetime import date, datetime, timedelta
 from flask import Blueprint, request, jsonify, abort
 from sqlalchemy import or_
+import requests
+import yfinance as yf
 
 from .models import (
     db,
@@ -26,6 +27,48 @@ from flask_jwt_extended import (
 
 api_bp = Blueprint("api", __name__)
 
+# ------- Simple In-Memory Caches -------
+
+# Kursdaten-Caching (historische Marketdata)
+MARKETDATA_CACHE = {}  # Key: (symbol, period, interval) -> {"expires_at": datetime, "payload": dict}
+
+# Company-/Ticker-Info-Caching (inkl. ISIN etc.)
+COMPANYINFO_CACHE = {}  # Key: symbol -> {"expires_at": datetime, "info": dict}
+
+# Trending-Listen-Caching
+TRENDING_CACHE = {}  # Key: region -> {"expires_at": datetime, "quotes": list}
+
+
+def _now_utc():
+    return datetime.utcnow()
+
+
+def get_company_info_cached(symbol: str, ttl_seconds: int = 3600):
+    """
+    Holt Company-Info aus Cache oder via yfinance.Ticker.
+    Wird von /companyinfo, /aktie/search und /aktie/trending verwendet.
+    """
+    now = _now_utc()
+    entry = COMPANYINFO_CACHE.get(symbol)
+    if entry and entry["expires_at"] > now:
+        return entry["info"]
+
+    # Neu von yfinance holen
+    ticker = yf.Ticker(symbol)
+
+    info = {}
+    if hasattr(ticker, "info") and isinstance(ticker.info, dict):
+        info = ticker.info or {}
+    else:
+        basic = getattr(ticker, "basic_info", {}) or {}
+        fast = getattr(ticker, "fast_info", {}) or {}
+        info = {**basic, **fast}
+
+    COMPANYINFO_CACHE[symbol] = {
+        "info": info,
+        "expires_at": now + timedelta(seconds=ttl_seconds),
+    }
+    return info
 
 # ------- Helper -------
 
@@ -282,40 +325,6 @@ def aktie_detail(aktie_id):
     db.session.commit()
     return jsonify({"message": f"Aktie {aktie_id} deleted"}), 200
 
-# ---------- Search Endpoint für Aktien:
-@api_bp.route("/aktien/search", methods=["GET"])
-@jwt_required()
-def aktien_search():
-    """
-    Suche nach Aktien anhand eines Suchbegriffs.
-    Es werden Name, ISIN (Ticker) und Firma durchsucht.
-
-    Request:
-        GET /api/aktien/search?q=APPLE
-
-    Response:
-        [
-            { ...Aktie.to_dict()... },
-            ...
-        ]
-    """
-    query = request.args.get("q", "").strip()
-
-    if not query:
-        abort(400, description="Suchstring nicht übergeben!")
-
-    # Case-insensitive Suche mit LIKE
-    like_pattern = f"%{query}%"
-
-    results = Aktie.query.filter(
-        or_(
-            Aktie.name.ilike(like_pattern),
-            Aktie.isin.ilike(like_pattern),
-            Aktie.firma.ilike(like_pattern),
-        )
-    ).all()
-
-    return jsonify([a.to_dict() for a in results]), 200
 
 # ======================
 #       WATCHLIST
@@ -513,7 +522,6 @@ def chat_entry_detail(chat_id, entry_id):
 @api_bp.route("/marketdata", methods=["GET"])
 @jwt_required()
 def marketdata():
-   
     symbol = request.args.get("symbol")
     if not symbol:
         abort(400, description="Query parameter 'symbol' is required (e.g., AAPL, MSFT, BMW.DE).")
@@ -522,6 +530,19 @@ def marketdata():
     period = request.args.get("range", "1mo")
     interval = request.args.get("interval", "1d")
 
+    # -------- Caching-Logik --------
+    cache_key = (symbol, period, interval)
+    now = _now_utc()
+    cache_entry = MARKETDATA_CACHE.get(cache_key)
+
+    # TTL z.B. 5 Minuten
+    ttl_seconds = 300
+
+    if cache_entry and cache_entry["expires_at"] > now:
+        # Direkt aus Cache antworten
+        return jsonify(cache_entry["payload"]), 200
+
+    # -------- Wenn nicht im Cache oder abgelaufen: frische Daten holen --------
     try:
         ticker = yf.Ticker(symbol)
         hist = ticker.history(period=period, interval=interval)
@@ -542,12 +563,20 @@ def marketdata():
             "volume": int(row["Volume"]) if not (row["Volume"] != row["Volume"]) else None,  # handle NaN
         })
 
-    return jsonify({
+    payload = {
         "symbol": symbol,
         "range": period,
         "interval": interval,
         "data": data,
-    }), 200
+    }
+
+    # In Cache speichern
+    MARKETDATA_CACHE[cache_key] = {
+        "expires_at": now + timedelta(seconds=ttl_seconds),
+        "payload": payload,
+    }
+
+    return jsonify(payload), 200
 
 # ======================
 #      Company-Info
@@ -583,3 +612,151 @@ def companyinfo():
         "symbol": symbol,
         "company_data": info
     }), 200
+
+@api_bp.route("/aktie/search", methods=["GET"])
+@jwt_required()
+def aktie_search():
+    """
+    Suche nach Aktien über Namen/Firma/Symbol mit yfinance.
+    - 1x yf.Search(...) für die eigentliche Suche
+    - danach pro gefundenem Symbol ein yf.Ticker(symbol).info Call, um ISIN zu holen
+    Antwort: nur Aktien-Daten (quotes), angereichert um 'ticker' und 'isin'.
+    """
+    # Name aus Query-Param holen: ?name=Apple oder ?q=Apple
+    query = request.args.get("name") or request.args.get("q")
+    if not query:
+        abort(400, description="Query parameter 'name' (oder 'q') ist erforderlich, z.B. ?name=Apple")
+
+    try:
+        # 1. API-Call: Suche nach passenden Symbolen
+        search = yf.Search(query, max_results=10)
+        quotes = search.quotes or []
+    except Exception as e:
+        abort(500, description=f"Fehler bei der Aktie-Suche: {str(e)}")
+
+    if not quotes:
+        abort(404, description=f"Keine Aktien-Treffer für '{query}' gefunden.")
+
+    # 2. Für jedes gefundene Symbol ISIN nachladen
+    #    (zusätzlicher API-Call pro Symbol)
+    for q in quotes:
+        symbol = q.get("symbol")
+        isin = None
+
+        if symbol:
+            try:
+                ticker_obj = yf.Ticker(symbol)
+                info = getattr(ticker_obj, "info", {}) or {}
+                # je nach Datenquelle kann der Key 'isin' oder 'ISIN' heißen oder gar nicht existieren
+                isin = info.get("isin") or info.get("ISIN")
+            except Exception:
+                isin = None  # Wenn etwas schiefgeht, ISIN einfach leer lassen
+
+        # ticker-Feld explizit setzen (alias für symbol)
+        q["ticker"] = symbol
+        # ISIN-Feld ergänzen
+        q["isin"] = isin
+
+    # Nur Aktien-Daten zurückgeben
+    return jsonify({
+        "query": query,
+        "quotes": quotes
+    }), 200
+
+@api_bp.route("/aktie/trending", methods=["GET"])
+@jwt_required()
+def aktie_trending():
+    """
+    Liefert Trending-Aktien von Yahoo Finance.
+    - Holt Trending-List direkt vom Yahoo-Endpoint (über requests)
+    - Anreichern der Ticker mit Details über yfinance.Ticker(...).info
+    - Gibt je Aktie u.a. Ticker, ISIN, Namen, Exchange, Sector, Industry, Preis zurück.
+    """
+
+    # Optionaler Query-Parameter: Region (Standard: US)
+    region = request.args.get("region", "US")
+    url = f"https://query1.finance.yahoo.com/v1/finance/trending/{region}"
+
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
+
+    # 1) Trending-Daten von Yahoo holen
+    try:
+        resp = requests.get(url, headers=headers, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as e:
+        abort(500, description=f"Fehler beim Abrufen der Trending-Aktien: {str(e)}")
+
+    # 2) Quotes aus der Antwort extrahieren
+    try:
+        results = data.get("finance", {}).get("result", [])
+        if not results:
+            abort(404, description=f"Keine Trending-Daten für Region '{region}' gefunden.")
+
+        quotes = results[0].get("quotes", [])
+    except Exception:
+        abort(500, description="Antwortformat von Yahoo Finance unerwartet.")
+
+    if not quotes:
+        abort(404, description=f"Keine Trending-Aktien für Region '{region}' gefunden.")
+
+    # 3) Für jeden Ticker Details + ISIN via yfinance holen
+    enriched = []
+    for q in quotes:
+        symbol = q.get("symbol")
+        info = {}
+        if symbol:
+            try:
+                ticker_obj = yf.Ticker(symbol)
+                info = getattr(ticker_obj, "info", {}) or {}
+            except Exception:
+                info = {}
+
+        enriched.append({
+            # Basis
+            "symbol": symbol,
+            "ticker": symbol,
+
+            # Namen
+            "shortname": (
+                info.get("shortName")
+                or q.get("shortName")
+                or q.get("shortname")
+            ),
+            "longname": (
+                info.get("longName")
+                or q.get("longName")
+                or q.get("longname")
+            ),
+
+            # Börse / Markt
+            "exchange": (
+                info.get("exchange")
+                or q.get("fullExchangeName")
+                or q.get("exchange")
+            ),
+
+            # Finanzdaten
+            "currency": info.get("currency"),
+            "sector": info.get("sector"),
+            "industry": info.get("industry"),
+            "quoteType": info.get("quoteType") or q.get("quoteType"),
+            "regularMarketPrice": info.get("regularMarketPrice"),
+            "regularMarketChangePercent": info.get("regularMarketChangePercent"),
+
+            # ISIN (falls verfügbar)
+            "isin": info.get("isin") or info.get("ISIN"),
+
+            # optional: der rohe Trending-Eintrag von Yahoo
+            "raw_trending": q,
+        })
+
+    return jsonify({
+        "region": region,
+        "count": len(enriched),
+        "results": enriched,
+    }), 200
+
+
