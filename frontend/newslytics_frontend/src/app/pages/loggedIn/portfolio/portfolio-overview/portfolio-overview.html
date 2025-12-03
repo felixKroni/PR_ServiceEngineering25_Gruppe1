@@ -1,0 +1,41 @@
+
+<section class="portfolio-overview" *ngIf="!error; else errorTpl">
+	<div *ngIf="isLoading" class="state">Portfolio wird geladen ...</div>
+	<div class="layout" *ngIf="!isLoading && portfolio">
+		<div class="summary">
+			<p class="eyebrow">Portfolio</p>
+			<h1>{{ portfolio.name }}</h1>
+		</div>
+
+		<section class="positions">
+		<header>
+			<h2>Positionen</h2>
+		</header>
+		<p *ngIf="transactionsLoading" class="state">Positionen werden geladen ...</p>
+		<p *ngIf="!transactionsLoading && transactionsError" class="state error">
+			{{ transactionsError }}
+		</p>
+		<p *ngIf="!transactionsLoading && !transactionsError && transactions.length === 0" class="state state-empty">
+			Noch keine Positionen vorhanden.
+		</p>
+		<div class="positions-grid" *ngIf="!transactionsLoading && !transactionsError && transactions.length > 0">
+			<app-stock-position 
+				*ngFor="let transaction of transactions" 
+				[transaction]="transaction"
+				(editClick)="onEditTransaction($event)" />
+		</div>
+		</section>
+	</div>
+</section>
+
+@if (showEditModal && selectedTransaction) {
+	<app-transaction-edit-modal
+		[transaction]="selectedTransaction"
+		(close)="onCloseEditModal()"
+		(transactionUpdated)="onTransactionUpdated()"
+		(transactionDeleted)="onTransactionDeleted()" />
+}
+
+<ng-template #errorTpl>
+	<p class="state error">{{ error }}</p>
+</ng-template>

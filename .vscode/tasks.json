@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "ng serve (frontend)",
+      "type": "shell",
+      "command": "npx",
+      "args": [
+        "ng",
+        "serve"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/frontend/newslytics_frontend",
+        "shell": {
+          "executable": "powershell.exe"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": [
+        "$tsc"
+      ],
+      "group": "build"
+    }
+  ]
+}

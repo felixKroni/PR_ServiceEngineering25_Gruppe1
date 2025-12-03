@@ -15,5 +15,5 @@ ENV CHOKIDAR_USEPOLLING=true
 
 EXPOSE 4200
 
-# start the Angular dev server on 0.0.0.0 so it is reachable from host
-CMD ["sh", "-c", "npm start -- --host 0.0.0.0 --poll=2000"]
+# start the Angular dev server on 0.0.0.0 with source maps enabled for debugging
+CMD ["sh", "-c", "npm start -- --host 0.0.0.0 --poll=2000 --source-map"]

@@ -1,0 +1,107 @@
+<div class="searchbar-container">
+    <div class="search-input-wrapper">
+        <div class="search-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+            </svg>
+        </div>
+        <input
+            type="text"
+            class="search-input"
+            placeholder="Aktien nach Name oder Symbol suchen..."
+            [(ngModel)]="searchQuery"
+            (input)="onSearchInput()"
+            (focus)="onFocus()"
+            (blur)="onBlur()"
+        />
+        @if (searchQuery) {
+            <button
+                class="clear-btn"
+                type="button"
+                (click)="clearSearch()"
+            >
+                ×
+            </button>
+        }
+        @if (loading) {
+            <div class="loading-indicator">
+                <div class="spinner"></div>
+            </div>
+        }
+    </div>
+
+    @if (showResults) {
+        <div class="results-dropdown">
+            @if (error) {
+                <div class="error-message">
+                    {{ error }}
+                </div>
+            }
+
+            @if (searchQuery && searchResults.length > 0) {
+                <div class="results-section">
+                    <div class="section-title">Suchergebnisse</div>
+                    @for (stock of searchResults; track stock.symbol) {
+                        <div
+                            class="result-item"
+                            (click)="selectStock(stock)"
+                        >
+                            <div class="stock-info">
+                                <div class="stock-symbol">{{ stock.ticker || stock.symbol }}</div>
+                                <div class="stock-name">{{ stock.shortName || stock.longName || 'N/A' }}</div>
+                            </div>
+                            <div class="stock-meta">
+                                @if (stock.exchange) {
+                                    <span class="exchange">{{ stock.exchange }}</span>
+                                }
+                                @if (stock.isin) {
+                                    <span class="isin">{{ stock.isin }}</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+            @if (searchQuery && searchResults.length === 0 && !loading) {
+                <div class="no-results">
+                    Keine Aktien gefunden für "{{ searchQuery }}"
+                </div>
+            }
+
+            @if (!searchQuery && trendingStocks.length > 0) {
+                <div class="results-section">
+                    <div class="section-title">Trendaktien</div>
+                    @for (stock of trendingStocks; track stock.symbol) {
+                        <div
+                            class="result-item trending"
+                            (click)="selectStock(stock)"
+                        >
+                            <div class="stock-info">
+                                <div class="stock-symbol">{{ stock.ticker || stock.symbol }}</div>
+                                <div class="stock-name">{{ stock.shortname || stock.longname || 'N/A' }}</div>
+                            </div>
+                            <div class="stock-meta">
+                                @if (stock.regularMarketPrice) {
+                                    <span class="price">
+                                        {{ stock.regularMarketPrice | currency: stock.currency || 'USD' }}
+                                    </span>
+                                }
+                                @if (stock.regularMarketChangePercent) {
+                                    <span
+                                        class="change"
+                                        [class.positive]="stock.regularMarketChangePercent > 0"
+                                        [class.negative]="stock.regularMarketChangePercent < 0"
+                                    >
+                                        {{ stock.regularMarketChangePercent > 0 ? '+' : '' }}{{ stock.regularMarketChangePercent | number: '1.2-2' }}%
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>

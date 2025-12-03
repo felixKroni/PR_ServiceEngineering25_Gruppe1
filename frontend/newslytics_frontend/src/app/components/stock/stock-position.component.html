@@ -1,0 +1,41 @@
+<article class="stock-card" (click)="onCardClick()">
+    @if (loading) {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading stock details...</p>
+        </div>
+    }
+    @if (error) {
+        <div class="error-state">
+            <p>{{ error }}</p>
+        </div>
+    }
+    @if (!loading && !error && stock) {
+        <header class="card-header">
+            <div>
+                <h2>{{ stock.name || stock.firma }}</h2>
+                <p class="isin">{{ stock.isin }}</p>
+            </div>
+            <span class="quantity">{{ transaction.menge | number:'1.0-4' }} Stück</span>
+        </header>
+
+        <dl class="meta">
+            <div>
+                <dt>Kaufpreis</dt>
+                <dd>{{ transaction.kaufpreis | number:'1.2-2' }} {{ stock.currency || '€' }}</dd>
+            </div>
+            <div>
+                <dt>Kaufdatum</dt>
+                <dd>{{ transaction.kaufdatum | date:'dd.MM.yyyy' }}</dd>
+            </div>
+            <div>
+                <dt>Gesamtwert</dt>
+                <dd>{{ totalValue | number:'1.2-2' }} {{ stock.currency || '€' }}</dd>
+            </div>
+            <div>
+                <dt>Kategorie</dt>
+                <dd>{{ stock.kategorie || 'N/A' }}</dd>
+            </div>
+        </dl>
+    }
+</article>
