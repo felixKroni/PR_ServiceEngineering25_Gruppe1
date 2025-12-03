@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
-import { Transaction } from '../../Models/stock';
+import { Transaction } from '../../models/stock';
 
 @Component({
     standalone: true,

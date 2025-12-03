@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { CreatePortfolioRequest, Portfolio } from '../Models/portfolio';
+import { CreatePortfolioRequest, Portfolio } from '../models/portfolio';
 import { environment } from '../config';
 
 @Injectable({

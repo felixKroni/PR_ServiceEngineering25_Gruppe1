@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
-import { Portfolio } from '../../Models/portfolio';
+import { Portfolio } from '../../models/portfolio';
 
 @Component({
     standalone: true,

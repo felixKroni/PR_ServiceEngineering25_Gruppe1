@@ -1,9 +1,14 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../config';
-import { Stock, Transaction } from '../Models/stock';
+import { 
+    Stock, 
+    Transaction, 
+    StockSearchResponse, 
+    TrendingStocksResponse 
+} from '../models/stock';
 
 @Injectable({
     providedIn: 'root'
@@ -27,5 +32,15 @@ export class StockService {
 
     getTransactionsByPortfolio(portfolioId: number): Observable<Transaction[]> {
         return this.http.get<Transaction[]>(`${this.baseUrl}/portfolios/${portfolioId}/transaktionen`);
+    }
+
+    searchStocks(query: string): Observable<StockSearchResponse> {
+        const params = new HttpParams().set('name', query);
+        return this.http.get<StockSearchResponse>(`${this.baseUrl}/aktie/search`, { params });
+    }
+
+    getTrendingStocks(region: string = 'US'): Observable<TrendingStocksResponse> {
+        const params = new HttpParams().set('region', region);
+        return this.http.get<TrendingStocksResponse>(`${this.baseUrl}/aktie/trending`, { params });
     }
 }

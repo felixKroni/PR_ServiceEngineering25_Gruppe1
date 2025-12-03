@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { PortfolioService } from '../../services/portfolio.service';
 import { AuthService } from '../../services/auth.service';
-import { Portfolio } from '../../Models/portfolio';
+import { Portfolio } from '../../models/portfolio';
 
 @Component({
     standalone: true,
