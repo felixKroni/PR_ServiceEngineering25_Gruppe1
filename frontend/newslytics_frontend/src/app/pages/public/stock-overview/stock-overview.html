@@ -1,7 +1,7 @@
 <div class="stock-overview-container">
     <div class="header">
-        <h1>Stock Search</h1>
-        <p class="subtitle">Search for stocks or browse trending options</p>
+        <h1>Aktiensuche</h1>
+        <p class="subtitle">Suchen Sie nach Aktien oder durchsuchen Sie Trendoptionen</p>
     </div>
 
     <div class="search-section">
@@ -11,7 +11,7 @@
     @if (selectedStock) {
         <div class="selected-stock-card">
             <div class="card-header">
-                <h2>Selected Stock</h2>
+                <h2>Ausgewählte Aktie</h2>
                 <button class="close-btn" (click)="selectedStock = null">×</button>
             </div>
             <div class="stock-details">
@@ -33,7 +33,7 @@
                 }
                 @if (isStockQuote(selectedStock) && selectedStock.longName) {
                     <div class="detail-row">
-                        <span class="label">Full Name:</span>
+                        <span class="label">Vollständiger Name:</span>
                         <span class="value">{{ selectedStock.longName }}</span>
                     </div>
                 }
@@ -51,29 +51,53 @@
                 }
                 @if (selectedStock.exchange) {
                     <div class="detail-row">
-                        <span class="label">Exchange:</span>
+                        <span class="label">Börse:</span>
                         <span class="value">{{ selectedStock.exchange }}</span>
                     </div>
                 }
                 @if (selectedStock.regularMarketPrice) {
                     <div class="detail-row">
-                        <span class="label">Price:</span>
+                        <span class="label">Preis:</span>
                         <span class="value price">{{ selectedStock.regularMarketPrice | currency: selectedStock.currency || 'USD' }}</span>
                     </div>
                 }
                 @if (selectedStock.sector) {
                     <div class="detail-row">
-                        <span class="label">Sector:</span>
+                        <span class="label">Sektor:</span>
                         <span class="value">{{ selectedStock.sector }}</span>
                     </div>
                 }
                 @if (selectedStock.industry) {
                     <div class="detail-row">
-                        <span class="label">Industry:</span>
+                        <span class="label">Branche:</span>
                         <span class="value">{{ selectedStock.industry }}</span>
                     </div>
                 }
             </div>
+            @if (isAuthenticated) {
+                <div class="card-actions">
+                    <button class="btn-primary" (click)="openPortfolioSelection()">
+                        Zum Portfolio hinzufügen
+                    </button>
+                </div>
+            }
         </div>
     }
 </div>
+
+@if (showPortfolioModal && selectedStock) {
+    <app-transaction-select-portfolio-modal
+        [stock]="selectedStock"
+        (portfolioSelected)="onPortfolioSelected($event)"
+        (close)="showPortfolioModal = false"
+    ></app-transaction-select-portfolio-modal>
+}
+
+@if (showTransactionModal && selectedPortfolio && selectedStock) {
+    <app-create-transaction-modal
+        [portfolio]="selectedPortfolio"
+        [stock]="selectedStock"
+        (close)="closeTransactionModal()"
+        (transactionCreated)="onTransactionCreated()"
+    ></app-create-transaction-modal>
+}

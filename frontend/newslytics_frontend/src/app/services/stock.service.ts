@@ -43,4 +43,8 @@ export class StockService {
         const params = new HttpParams().set('region', region);
         return this.http.get<TrendingStocksResponse>(`${this.baseUrl}/aktie/trending`, { params });
     }
+
+    createStock(stock: Partial<Stock>): Observable<Stock> {
+        return this.http.post<Stock>(`${this.baseUrl}/aktien`, stock);
+    }
 }

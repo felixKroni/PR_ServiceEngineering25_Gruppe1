@@ -1,1 +1,44 @@
-<p>transaction-select-portfolio-modal works!</p>
+<div class="modal-overlay" (click)="onOverlayClick($event)">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Portfolio auswählen</h2>
+            <button class="close-btn" type="button" (click)="close.emit()">x</button>
+        </div>
+
+        <div class="modal-body">
+            <p class="stock-info"><strong>{{ getStockName() }}</strong> zu Portfolio hinzufügen:</p>
+
+            @if (loading) {
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Portfolios werden geladen...</p>
+                </div>
+            }
+
+            @if (error) {
+                <div class="error-message">{{ error }}</div>
+            }
+
+            @if (!loading && !error && portfolios.length === 0) {
+                <div class="empty-state">
+                    <p>Sie haben noch keine Portfolios.</p>
+                    <p class="hint">Erstellen Sie zuerst ein Portfolio, um Aktien hinzuzufügen.</p>
+                </div>
+            }
+
+            @if (!loading && portfolios.length > 0) {
+                <div class="portfolio-list">
+                    @for (portfolio of portfolios; track portfolio.id) {
+                        <div class="portfolio-item" (click)="selectPortfolio(portfolio)">
+                            <div class="portfolio-info">
+                                <span class="portfolio-name">{{ portfolio.name }}</span>
+                                <span class="portfolio-id">ID: {{ portfolio.id }}</span>
+                            </div>
+                            <div class="arrow">→</div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

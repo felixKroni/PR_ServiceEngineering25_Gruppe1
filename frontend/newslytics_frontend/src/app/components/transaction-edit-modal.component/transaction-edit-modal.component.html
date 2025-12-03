@@ -1,0 +1,120 @@
+<div class="modal-overlay" (click)="onOverlayClick($event)">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Transaktion bearbeiten</h2>
+      <button class="close-btn" (click)="close.emit()" [disabled]="loading || deleting">&times;</button>
+    </div>
+
+    @if (stockLoading) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Aktiendetails werden geladen...</p>
+      </div>
+    } @else {
+      <div class="modal-body">
+        <div class="stock-info">
+          <h3>{{ getStockName() }}</h3>
+          @if (stock) {
+            <p class="stock-isin">ISIN: {{ stock.isin }}</p>
+          }
+        </div>
+
+        @if (showDeleteConfirm) {
+          <div class="delete-confirm">
+            <p class="warning-text">Sind Sie sicher, dass Sie diese Transaktion löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.</p>
+            <div class="confirm-actions">
+              <button 
+                class="btn btn-danger" 
+                (click)="confirmDelete()" 
+                [disabled]="deleting">
+                @if (deleting) {
+                  <span class="spinner-small"></span>
+                } @else {
+                  Löschen bestätigen
+                }
+              </button>
+              <button 
+                class="btn btn-secondary" 
+                (click)="cancelDelete()" 
+                [disabled]="deleting">
+                Abbrechen
+              </button>
+            </div>
+          </div>
+        } @else {
+          <form (ngSubmit)="onSubmit()">
+            @if (error) {
+              <div class="error-message">{{ error }}</div>
+            }
+
+            <div class="form-group">
+              <label for="menge">Menge</label>
+              <input
+                type="number"
+                id="menge"
+                name="menge"
+                [(ngModel)]="menge"
+                [disabled]="loading"
+                min="1"
+                step="1"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="kaufpreis">Kaufpreis ({{ stock?.currency || 'EUR' }})</label>
+              <input
+                type="number"
+                id="kaufpreis"
+                name="kaufpreis"
+                [(ngModel)]="kaufpreis"
+                [disabled]="loading"
+                min="0.01"
+                step="0.01"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="kaufdatum">Kaufdatum</label>
+              <input
+                type="date"
+                id="kaufdatum"
+                name="kaufdatum"
+                [(ngModel)]="kaufdatum"
+                [disabled]="loading"
+                required
+              />
+            </div>
+
+            <div class="calculated-value">
+              <span>Gesamtwert:</span>
+              <strong>{{ (menge * kaufpreis).toFixed(2) }} {{ stock?.currency || 'EUR' }}</strong>
+            </div>
+
+            <div class="modal-actions">
+              <button 
+                type="button" 
+                class="btn btn-danger" 
+                (click)="onDelete()" 
+                [disabled]="loading">
+                Transaktion löschen
+              </button>
+              <button 
+                type="submit" 
+                class="btn btn-primary" 
+                [disabled]="loading">
+                @if (loading) {
+                  <span class="spinner-small"></span>
+                  Aktualisieren...
+                } @else {
+                  Transaktion aktualisieren
+                }
+              </button>
+            </div>
+          </form>
+        }
+      </div>
+    }
+  </div>
+</div>

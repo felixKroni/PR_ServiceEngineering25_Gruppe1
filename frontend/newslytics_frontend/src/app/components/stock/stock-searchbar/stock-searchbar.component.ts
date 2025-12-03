@@ -22,6 +22,9 @@ export class StockSearchbar implements OnInit {
     error: string | null = null;
     showResults = false;
 
+    //Only for testing purposes as long as the backend does not provide ISINs
+    dummyISIN = true;
+
     private searchSubject = new Subject<string>();
 
     constructor(private stockService: StockService) {}
@@ -53,6 +56,11 @@ export class StockSearchbar implements OnInit {
             )
             .subscribe(response => {
                 this.searchResults = response.quotes;
+                if(this.dummyISIN === true){
+                    this.searchResults.forEach(result => {
+                        result.isin = 'ISIN' + Math.random().toString(36).substring(2, 12).toUpperCase();
+                    });
+                }
                 this.loading = false;
             });
     }
@@ -61,6 +69,11 @@ export class StockSearchbar implements OnInit {
         this.stockService.getTrendingStocks('US').subscribe({
             next: response => {
                 this.trendingStocks = response.results.slice(0, 5);
+                if(this.dummyISIN === true){
+                    this.trendingStocks.forEach(result => {
+                        result.isin = 'ISIN' + Math.random().toString(36).substring(2, 12).toUpperCase();
+                    });
+                }
             },
             error: err => {
                 console.error('Failed to load trending stocks:', err);

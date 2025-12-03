@@ -9,7 +9,7 @@
         <input
             type="text"
             class="search-input"
-            placeholder="Search stocks by name or symbol..."
+            placeholder="Aktien nach Name oder Symbol suchen..."
             [(ngModel)]="searchQuery"
             (input)="onSearchInput()"
             (focus)="onFocus()"
@@ -41,7 +41,7 @@
 
             @if (searchQuery && searchResults.length > 0) {
                 <div class="results-section">
-                    <div class="section-title">Search Results</div>
+                    <div class="section-title">Suchergebnisse</div>
                     @for (stock of searchResults; track stock.symbol) {
                         <div
                             class="result-item"
@@ -66,13 +66,13 @@
 
             @if (searchQuery && searchResults.length === 0 && !loading) {
                 <div class="no-results">
-                    No stocks found for "{{ searchQuery }}"
+                    Keine Aktien gefunden für "{{ searchQuery }}"
                 </div>
             }
 
             @if (!searchQuery && trendingStocks.length > 0) {
                 <div class="results-section">
-                    <div class="section-title">Trending Stocks</div>
+                    <div class="section-title">Trendaktien</div>
                     @for (stock of trendingStocks; track stock.symbol) {
                         <div
                             class="result-item trending"

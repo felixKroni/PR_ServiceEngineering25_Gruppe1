@@ -3,15 +3,16 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Portfolio } from '../../../../models/portfolio';
-import { Transaction } from '../../../../models/stock';
+import { Transaction } from '../../../../models/transactions';
 import { PortfolioService } from '../../../../services/portfolio.service';
-import { StockService } from '../../../../services/stock.service';
+import { TransactionService } from '../../../../services/transaction.service';
 import { StockPositionComponent } from '../../../../components/stock/stock-position.component';
+import { TransactionEditModalComponent } from '../../../../components/transaction-edit-modal.component/transaction-edit-modal.component';
 
 @Component({
   standalone: true,
   selector: 'app-portfolio-overview',
-  imports: [CommonModule, StockPositionComponent],
+  imports: [CommonModule, StockPositionComponent, TransactionEditModalComponent],
   templateUrl: './portfolio-overview.html',
   styleUrl: './portfolio-overview.scss',
 })
@@ -19,14 +20,16 @@ export class PortfolioOverview implements OnInit {
   portfolio: Portfolio | null = null;
   isLoading = false;
   error: string | null = null;
-  positions: Transaction[] = [];
-  positionsLoading = false;
-  positionsError: string | null = null;
+  transactions: Transaction[] = [];
+  transactionsLoading = false;
+  transactionsError: string | null = null;
+  showEditModal = false;
+  selectedTransaction: Transaction | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private portfolioService: PortfolioService,
-    private stockService: StockService
+    private transactionService: TransactionService
   ) {}
 
   ngOnInit(): void {
@@ -47,7 +50,7 @@ export class PortfolioOverview implements OnInit {
       next: (portfolio) => {
         this.portfolio = portfolio;
         this.isLoading = false;
-        this.loadPositions(id);
+        this.loadTransactions(id);
       },
       error: () => {
         this.error = 'Portfolio konnte nicht geladen werden.';
@@ -56,40 +59,49 @@ export class PortfolioOverview implements OnInit {
     });
   }
 
-  private loadPositions(portfolioId: number): void {
-    this.positionsLoading = true;
-    this.stockService.getTransactionsByPortfolio(portfolioId).subscribe({
+  private loadTransactions(portfolioId: number): void {
+    this.transactionsLoading = true;
+    this.transactionService.getTransactionsByPortfolio(portfolioId).subscribe({
       next: (transactions) => {
-        this.positions = transactions;
-        this.positionsLoading = false;
-        this.positionsError = null;
+        this.transactions = transactions;
+        this.transactionsLoading = false;
+        this.transactionsError = null;
       },
-      error: () => {
-        this.positionsLoading = false;
-        this.positionsError = 'Positionen konnten nicht geladen werden.';
+      error: (err) => {
+        console.error('Failed to load transactions:', err);
+        this.transactionsLoading = false;
+        this.transactionsError = 'Positionen konnten nicht geladen werden.';
       }
     });
   }
 
-  addDummyPosition(): void {
-    if (!this.portfolio || this.positionsLoading) {
-      return;
+  onEditTransaction(transaction: Transaction): void {
+    this.selectedTransaction = transaction;
+    this.showEditModal = true;
+  }
+
+  onCloseEditModal(): void {
+    this.showEditModal = false;
+    this.selectedTransaction = null;
+  }
+
+  onTransactionUpdated(): void {
+    this.showEditModal = false;
+    this.selectedTransaction = null;
+    
+    // Reload transactions
+    if (this.portfolio) {
+      this.loadTransactions(this.portfolio.id);
     }
+  }
 
-    const maxId = this.positions.length
-      ? Math.max(...this.positions.map((position) => position.id))
-      : 0;
-
-    const dummy: Transaction = {
-      id: maxId + 1,
-      menge: 5,
-      kaufpreis: 123.45,
-      kaufdatum: new Date().toISOString(),
-      aktie_id: 999000 + (maxId + 1),
-      portfolio_id: this.portfolio.id,
-    };
-
-    this.positions = [...this.positions, dummy];
-    this.positionsError = null;
+  onTransactionDeleted(): void {
+    this.showEditModal = false;
+    this.selectedTransaction = null;
+    
+    // Reload transactions
+    if (this.portfolio) {
+      this.loadTransactions(this.portfolio.id);
+    }
   }
 }
