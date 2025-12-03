@@ -1,10 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { LoginModalComponent } from './Components/Auth/login-modal.component';
-import { RegisterModalComponent } from './Components/Auth/register-modal.component';
+import { LoginModalComponent } from './components/auth/login-modal.component';
+import { RegisterModalComponent } from './components/auth/register-modal.component';
 import { CommonModule } from '@angular/common';
-import { AuthService } from './Services/auth.service';
-import { AuthRequiredModalComponent } from './Components/Auth/auth-required.component';
+import { AuthService } from './services/auth.service';
+import { AuthRequiredModalComponent } from './components/auth/auth-required.component';
 
 @Component({
 	selector: 'app-root',

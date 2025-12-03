@@ -9,25 +9,25 @@ export const routes: Routes = [
   },
   {
     path: 'home',
-    loadComponent: () => import('./Pages/public/home/home').then(m => m.Home)
+    loadComponent: () => import('./pages/public/home/home').then(m => m.Home)
   },
   {
     path: 'dashboard',
     canActivate: [authGuard],
-    loadComponent: () => import('./Pages/loggedIn/dashboard/dashboard').then(m => m.Dashboard)
+    loadComponent: () => import('./pages/loggedIn/dashboard/dashboard').then(m => m.Dashboard)
   },
   {
     path: 'portfolios',
     canActivate: [authGuard],
-    loadComponent: () => import('./Pages/loggedIn/portfolio-list/portfolio-list').then(m => m.PortfolioList)
+    loadComponent: () => import('./pages/loggedIn/portfolio-list/portfolio-list').then(m => m.PortfolioList)
   },
   {
     path: 'portfolio/:id',
     canActivate: [authGuard],
-    loadComponent: () => import('./Pages/loggedIn/portfolio/portfolio-overview/portfolio-overview').then(m => m.PortfolioOverview)
+    loadComponent: () => import('./pages/loggedIn/portfolio/portfolio-overview/portfolio-overview').then(m => m.PortfolioOverview)
   },
   {
     path: 'stocks',
-    loadComponent: () => import('./Pages/public/stock-overview/stock-overview').then(m => m.StockOverview)
+    loadComponent: () => import('./pages/public/stock-overview/stock-overview').then(m => m.StockOverview)
   }
 ];

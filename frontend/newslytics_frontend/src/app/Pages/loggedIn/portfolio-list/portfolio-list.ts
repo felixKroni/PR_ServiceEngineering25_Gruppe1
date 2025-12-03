@@ -2,12 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { PortfolioPlaceholderComponent } from '../../../Components/Portfolio/portfolio-placeholder.component';
-import { CreatePortfolioModalComponent } from '../../../Components/Portfolio/create-portfolio-modal.component';
-import { RenamePortfolioModalComponent } from '../../../Components/Portfolio/rename-portfolio-modal.component';
-import { Portfolio } from '../../../Models/portfolio';
-import { AuthService } from '../../../Services/auth.service';
-import { PortfolioService } from '../../../Services/portfolio.service';
+import { PortfolioPlaceholderComponent } from '../../../components/portfolio/portfolio-placeholder.component';
+import { CreatePortfolioModalComponent } from '../../../components/portfolio/create-portfolio-modal.component';
+import { RenamePortfolioModalComponent } from '../../../components/portfolio/rename-portfolio-modal.component';
+import { Portfolio } from '../../../models/portfolio';
+import { AuthService } from '../../../services/auth.service';
+import { PortfolioService } from '../../../services/portfolio.service';
 
 @Component({
   standalone: true,

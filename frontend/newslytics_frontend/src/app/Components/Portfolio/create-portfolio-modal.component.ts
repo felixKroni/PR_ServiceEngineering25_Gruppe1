@@ -2,8 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { PortfolioService } from '../../Services/portfolio.service';
-import { AuthService } from '../../Services/auth.service';
+import { PortfolioService } from '../../services/portfolio.service';
+import { AuthService } from '../../services/auth.service';
 import { Portfolio } from '../../Models/portfolio';
 
 @Component({

@@ -2,11 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { Portfolio } from '../../../../Models/portfolio';
-import { Transaction } from '../../../../Models/stock';
-import { PortfolioService } from '../../../../Services/portfolio.service';
-import { StockService } from '../../../../Services/stock.service';
-import { StockPositionComponent } from '../../../../Components/Stock/stock-position.component';
+import { Portfolio } from '../../../../models/portfolio';
+import { Transaction } from '../../../../models/stock';
+import { PortfolioService } from '../../../../services/portfolio.service';
+import { StockService } from '../../../../services/stock.service';
+import { StockPositionComponent } from '../../../../components/stock/stock-position.component';
 
 @Component({
   standalone: true,
