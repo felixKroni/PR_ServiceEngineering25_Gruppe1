@@ -1,6 +1,8 @@
-from datetime import date
-
+from datetime import date, datetime, timedelta
 from flask import Blueprint, request, jsonify, abort
+from sqlalchemy import or_
+import requests
+import yfinance as yf
 
 from .models import (
     db,
@@ -25,6 +27,48 @@ from flask_jwt_extended import (
 
 api_bp = Blueprint("api", __name__)
 
+# ------- Simple In-Memory Caches -------
+
+# Kursdaten-Caching (historische Marketdata)
+MARKETDATA_CACHE = {}  # Key: (symbol, period, interval) -> {"expires_at": datetime, "payload": dict}
+
+# Company-/Ticker-Info-Caching (inkl. ISIN etc.)
+COMPANYINFO_CACHE = {}  # Key: symbol -> {"expires_at": datetime, "info": dict}
+
+# Trending-Listen-Caching
+TRENDING_CACHE = {}  # Key: region -> {"expires_at": datetime, "quotes": list}
+
+
+def _now_utc():
+    return datetime.utcnow()
+
+
+def get_company_info_cached(symbol: str, ttl_seconds: int = 3600):
+    """
+    Holt Company-Info aus Cache oder via yfinance.Ticker.
+    Wird von /companyinfo, /aktie/search und /aktie/trending verwendet.
+    """
+    now = _now_utc()
+    entry = COMPANYINFO_CACHE.get(symbol)
+    if entry and entry["expires_at"] > now:
+        return entry["info"]
+
+    # Neu von yfinance holen
+    ticker = yf.Ticker(symbol)
+
+    info = {}
+    if hasattr(ticker, "info") and isinstance(ticker.info, dict):
+        info = ticker.info or {}
+    else:
+        basic = getattr(ticker, "basic_info", {}) or {}
+        fast = getattr(ticker, "fast_info", {}) or {}
+        info = {**basic, **fast}
+
+    COMPANYINFO_CACHE[symbol] = {
+        "info": info,
+        "expires_at": now + timedelta(seconds=ttl_seconds),
+    }
+    return info
 
 # ------- Helper -------
 
@@ -156,6 +200,25 @@ def portfolios_collection():
     portfolios = Portfolio.query.all()
     return jsonify([p.to_dict() for p in portfolios])
 
+@api_bp.route("/portfolios/<int:portfolio_id>", methods=["PUT"])
+@jwt_required()
+def update_portfolio(portfolio_id):
+    data = get_json()
+
+    # Portfolio suchen
+    portfolio = Portfolio.query.get_or_404(portfolio_id)
+
+    # Sicherstellen, dass der eingeloggte Benutzer nur seine eigenen Portfolios ändert
+    current_user_id = int(get_jwt_identity())
+    if portfolio.user_id != current_user_id:
+        return jsonify({"error": "Not authorized - Not your portfolio."}), 403
+
+    if "name" in data:
+        portfolio.name = data["name"]
+
+    db.session.commit()
+
+    return jsonify(portfolio.to_dict()), 200
 
 @api_bp.route("/portfolios/<int:portfolio_id>", methods=["GET", "DELETE"])
 @jwt_required()
@@ -211,6 +274,43 @@ def aktien_collection():
     aktien = Aktie.query.all()
     return jsonify([a.to_dict() for a in aktien])
 
+@api_bp.route("/aktien/<int:aktie_id>", methods=["PUT"])
+@jwt_required()
+def update_aktie(aktie_id):
+    data = get_json()
+
+    # Aktie laden oder 404
+    aktie = Aktie.query.get_or_404(aktie_id)
+
+    # Alle optionalen Felder updaten, falls vorhanden
+    if "name" in data:
+        aktie.name = data["name"]
+    if "isin" in data:
+        aktie.isin = data["isin"]
+    if "firma" in data:
+        aktie.firma = data["firma"]
+    if "ausschüttungsart" in data:
+        aktie.ausschüttungsart = data["ausschüttungsart"]
+    if "kategorie" in data:
+        aktie.kategorie = data["kategorie"]
+    if "land" in data:
+        aktie.land = data["land"]
+    if "beschreibung" in data:
+        aktie.beschreibung = data["beschreibung"]
+    if "ebitda" in data:
+        aktie.ebitda = data["ebitda"]
+    if "nettogewinn" in data:
+        aktie.nettogewinn = data["nettogewinn"]
+    if "umsatz" in data:
+        aktie.umsatz = data["umsatz"]
+    if "currency" in data:
+        aktie.currency = data["currency"]
+    if "unternehmenswert" in data:
+        aktie.unternehmenswert = data["unternehmenswert"]
+
+    db.session.commit()
+
+    return jsonify(aktie.to_dict()), 200
 
 @api_bp.route("/aktien/<int:aktie_id>", methods=["GET", "DELETE"])
 @jwt_required()
@@ -292,6 +392,38 @@ def transaktionen_collection():
     txs = Transaktion.query.all()
     return jsonify([t.to_dict() for t in txs])
 
+@api_bp.route("/transaktionen/<int:tx_id>", methods=["PUT"])
+@jwt_required()
+def update_transaktion(tx_id):
+    data = get_json()
+
+    # Transaktion finden oder 404
+    tx = Transaktion.query.get_or_404(tx_id)
+
+    # Der User darf nur Transaktionen in seinen eigenen Portfolios bearbeiten
+    current_user_id = int(get_jwt_identity())
+    if tx.portfolio.user_id != current_user_id:
+        return jsonify({"error": "Not authorized - Not your transaction."}), 403
+
+    # Felder aktualisieren, falls im Request enthalten
+    if "menge" in data:
+        tx.menge = data["menge"]
+
+    if "kaufpreis" in data:
+        tx.kaufpreis = data["kaufpreis"]
+
+    if "kaufdatum" in data:
+        tx.kaufdatum = date.fromisoformat(data["kaufdatum"])
+
+    if "aktie_id" in data:
+        tx.aktie_id = data["aktie_id"]
+
+    if "portfolio_id" in data:
+        tx.portfolio_id = data["portfolio_id"]
+
+    db.session.commit()
+
+    return jsonify(tx.to_dict()), 200
 
 @api_bp.route("/transaktionen/<int:tx_id>", methods=["DELETE"])
 @jwt_required()
@@ -382,3 +514,249 @@ def chat_entry_detail(chat_id, entry_id):
     db.session.delete(entry)
     db.session.commit()
     return jsonify({"message": f"Chat entry {entry_id} in chat {chat_id} deleted"}), 200
+
+
+# ======================
+#      Market-Data
+# ======================
+@api_bp.route("/marketdata", methods=["GET"])
+@jwt_required()
+def marketdata():
+    symbol = request.args.get("symbol")
+    if not symbol:
+        abort(400, description="Query parameter 'symbol' is required (e.g., AAPL, MSFT, BMW.DE).")
+
+    # Default values if not provided
+    period = request.args.get("range", "1mo")
+    interval = request.args.get("interval", "1d")
+
+    # -------- Caching-Logik --------
+    cache_key = (symbol, period, interval)
+    now = _now_utc()
+    cache_entry = MARKETDATA_CACHE.get(cache_key)
+
+    # TTL z.B. 5 Minuten
+    ttl_seconds = 300
+
+    if cache_entry and cache_entry["expires_at"] > now:
+        # Direkt aus Cache antworten
+        return jsonify(cache_entry["payload"]), 200
+
+    # -------- Wenn nicht im Cache oder abgelaufen: frische Daten holen --------
+    try:
+        ticker = yf.Ticker(symbol)
+        hist = ticker.history(period=period, interval=interval)
+    except Exception as e:
+        abort(500, description=f"Error fetching market data: {str(e)}")
+
+    if hist.empty:
+        abort(404, description=f"No market data found for symbol '{symbol}'.")
+
+    data = []
+    for ts, row in hist.iterrows():
+        data.append({
+            "datetime": ts.isoformat(),
+            "open": float(row["Open"]),
+            "high": float(row["High"]),
+            "low": float(row["Low"]),
+            "close": float(row["Close"]),
+            "volume": int(row["Volume"]) if not (row["Volume"] != row["Volume"]) else None,  # handle NaN
+        })
+
+    payload = {
+        "symbol": symbol,
+        "range": period,
+        "interval": interval,
+        "data": data,
+    }
+
+    # In Cache speichern
+    MARKETDATA_CACHE[cache_key] = {
+        "expires_at": now + timedelta(seconds=ttl_seconds),
+        "payload": payload,
+    }
+
+    return jsonify(payload), 200
+
+# ======================
+#      Company-Info
+# ======================
+
+@api_bp.route("/companyinfo", methods=["GET"])
+@jwt_required()
+def companyinfo():
+    symbol = request.args.get("symbol")
+    if not symbol:
+        abort(400, description="Query parameter 'symbol' is required (e.g., AAPL, MSFT, BMW.DE).")
+
+    try:
+        ticker = yf.Ticker(symbol)
+
+        info = {}
+
+        if hasattr(ticker, "info") and isinstance(ticker.info, dict):
+            info = ticker.info or {}
+        else:
+            basic = getattr(ticker, "basic_info", {}) or {}
+            fast = getattr(ticker, "fast_info", {}) or {}
+
+            info = {**basic, **fast}
+
+        if not info:
+            abort(404, description=f"No company data found for symbol '{symbol}'.")
+
+    except Exception as e:
+        abort(500, description=f"Error fetching company information: {str(e)}")
+
+    return jsonify({
+        "symbol": symbol,
+        "company_data": info
+    }), 200
+
+@api_bp.route("/aktie/search", methods=["GET"])
+@jwt_required()
+def aktie_search():
+    """
+    Suche nach Aktien über Namen/Firma/Symbol mit yfinance.
+    - 1x yf.Search(...) für die eigentliche Suche
+    - danach pro gefundenem Symbol ein yf.Ticker(symbol).info Call, um ISIN zu holen
+    Antwort: nur Aktien-Daten (quotes), angereichert um 'ticker' und 'isin'.
+    """
+    # Name aus Query-Param holen: ?name=Apple oder ?q=Apple
+    query = request.args.get("name") or request.args.get("q")
+    if not query:
+        abort(400, description="Query parameter 'name' (oder 'q') ist erforderlich, z.B. ?name=Apple")
+
+    try:
+        # 1. API-Call: Suche nach passenden Symbolen
+        search = yf.Search(query, max_results=10)
+        quotes = search.quotes or []
+    except Exception as e:
+        abort(500, description=f"Fehler bei der Aktie-Suche: {str(e)}")
+
+    if not quotes:
+        abort(404, description=f"Keine Aktien-Treffer für '{query}' gefunden.")
+
+    # 2. Für jedes gefundene Symbol ISIN nachladen
+    #    (zusätzlicher API-Call pro Symbol)
+    for q in quotes:
+        symbol = q.get("symbol")
+        isin = None
+
+        if symbol:
+            try:
+                ticker_obj = yf.Ticker(symbol)
+                info = getattr(ticker_obj, "info", {}) or {}
+                # je nach Datenquelle kann der Key 'isin' oder 'ISIN' heißen oder gar nicht existieren
+                isin = info.get("isin") or info.get("ISIN")
+            except Exception:
+                isin = None  # Wenn etwas schiefgeht, ISIN einfach leer lassen
+
+        # ticker-Feld explizit setzen (alias für symbol)
+        q["ticker"] = symbol
+        # ISIN-Feld ergänzen
+        q["isin"] = isin
+
+    # Nur Aktien-Daten zurückgeben
+    return jsonify({
+        "query": query,
+        "quotes": quotes
+    }), 200
+
+@api_bp.route("/aktie/trending", methods=["GET"])
+@jwt_required()
+def aktie_trending():
+    """
+    Liefert Trending-Aktien von Yahoo Finance.
+    - Holt Trending-List direkt vom Yahoo-Endpoint (über requests)
+    - Anreichern der Ticker mit Details über yfinance.Ticker(...).info
+    - Gibt je Aktie u.a. Ticker, ISIN, Namen, Exchange, Sector, Industry, Preis zurück.
+    """
+
+    # Optionaler Query-Parameter: Region (Standard: US)
+    region = request.args.get("region", "US")
+    url = f"https://query1.finance.yahoo.com/v1/finance/trending/{region}"
+
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
+
+    # 1) Trending-Daten von Yahoo holen
+    try:
+        resp = requests.get(url, headers=headers, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as e:
+        abort(500, description=f"Fehler beim Abrufen der Trending-Aktien: {str(e)}")
+
+    # 2) Quotes aus der Antwort extrahieren
+    try:
+        results = data.get("finance", {}).get("result", [])
+        if not results:
+            abort(404, description=f"Keine Trending-Daten für Region '{region}' gefunden.")
+
+        quotes = results[0].get("quotes", [])
+    except Exception:
+        abort(500, description="Antwortformat von Yahoo Finance unerwartet.")
+
+    if not quotes:
+        abort(404, description=f"Keine Trending-Aktien für Region '{region}' gefunden.")
+
+    # 3) Für jeden Ticker Details + ISIN via yfinance holen
+    enriched = []
+    for q in quotes:
+        symbol = q.get("symbol")
+        info = {}
+        if symbol:
+            try:
+                ticker_obj = yf.Ticker(symbol)
+                info = getattr(ticker_obj, "info", {}) or {}
+            except Exception:
+                info = {}
+
+        enriched.append({
+            # Basis
+            "symbol": symbol,
+            "ticker": symbol,
+
+            # Namen
+            "shortname": (
+                info.get("shortName")
+                or q.get("shortName")
+                or q.get("shortname")
+            ),
+            "longname": (
+                info.get("longName")
+                or q.get("longName")
+                or q.get("longname")
+            ),
+
+            # Börse / Markt
+            "exchange": (
+                info.get("exchange")
+                or q.get("fullExchangeName")
+                or q.get("exchange")
+            ),
+
+            # Finanzdaten
+            "currency": info.get("currency"),
+            "sector": info.get("sector"),
+            "industry": info.get("industry"),
+            "quoteType": info.get("quoteType") or q.get("quoteType"),
+            "regularMarketPrice": info.get("regularMarketPrice"),
+            "regularMarketChangePercent": info.get("regularMarketChangePercent"),
+
+            # ISIN (falls verfügbar)
+            "isin": info.get("isin") or info.get("ISIN"),
+
+            # optional: der rohe Trending-Eintrag von Yahoo
+            "raw_trending": q,
+        })
+
+    return jsonify({
+        "region": region,
+        "count": len(enriched),
+        "results": enriched,
+    }), 200
+
+

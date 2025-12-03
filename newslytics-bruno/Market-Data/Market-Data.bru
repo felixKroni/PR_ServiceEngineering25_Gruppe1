@@ -1,0 +1,17 @@
+meta {
+  name: Market-Data
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:5001/api/marketdata?symbol=AAPL&range=1m&interval=1h
+  body: none
+  auth: inherit
+}
+
+params:query {
+  symbol: AAPL
+  range: 1m
+  interval: 1h
+}

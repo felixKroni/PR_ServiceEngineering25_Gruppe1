@@ -1,0 +1,18 @@
+meta {
+  name: Protfolio bearbeiten
+  type: http
+  seq: 6
+}
+
+put {
+  url: http://localhost:5001/api/portfolios/1
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "id": 1,
+    "name": "Langfrist-Portfolio2"
+  }
+}

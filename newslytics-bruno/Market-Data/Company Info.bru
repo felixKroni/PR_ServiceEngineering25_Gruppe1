@@ -1,0 +1,15 @@
+meta {
+  name: Company Info
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:5001/api/companyinfo?symbol=AAPL
+  body: none
+  auth: inherit
+}
+
+params:query {
+  symbol: AAPL
+}
