@@ -1,0 +1,50 @@
+<div class="trending-container">
+  <div class="trending-header">
+    <h3>📈 Trending Stocks</h3>
+    <p class="trending-subtitle">Aktuell beliebte Aktien</p>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Lade Trending-Aktien...</p>
+    </div>
+  }
+
+  @if (error) {
+    <div class="error-state">
+      <p>{{ error }}</p>
+    </div>
+  }
+
+  @if (!loading && !error && trendingStocks.length > 0) {
+    <div class="stocks-list">
+      @for (stock of trendingStocks; track stock.symbol) {
+        <div class="stock-item">
+          <div class="stock-main">
+            <div class="stock-symbol">{{ stock.ticker }}</div>
+            <div class="stock-name">{{ stock.shortname || stock.longname || 'N/A' }}</div>
+          </div>
+          <div class="stock-metrics">
+            @if (stock.regularMarketPrice) {
+              <div class="stock-price">
+                {{ stock.regularMarketPrice | currency: stock.currency || 'USD':'symbol':'1.2-2' }}
+              </div>
+            }
+            @if (stock.regularMarketChangePercent !== undefined && stock.regularMarketChangePercent !== null) {
+              <div class="stock-change" [ngClass]="getChangeClass(stock.regularMarketChangePercent)">
+                {{ formatChange(stock.regularMarketChangePercent) }}
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="trending-footer">
+    <a routerLink="/stocks" class="view-all-link">
+      Alle Aktien anzeigen →
+    </a>
+  </div>
+</div>

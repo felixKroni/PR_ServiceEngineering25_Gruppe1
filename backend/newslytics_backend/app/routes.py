@@ -520,7 +520,6 @@ def chat_entry_detail(chat_id, entry_id):
 #      Market-Data
 # ======================
 @api_bp.route("/marketdata", methods=["GET"])
-@jwt_required()
 def marketdata():
     symbol = request.args.get("symbol")
     if not symbol:
@@ -583,7 +582,6 @@ def marketdata():
 # ======================
 
 @api_bp.route("/companyinfo", methods=["GET"])
-@jwt_required()
 def companyinfo():
     symbol = request.args.get("symbol")
     if not symbol:
@@ -614,7 +612,6 @@ def companyinfo():
     }), 200
 
 @api_bp.route("/aktie/search", methods=["GET"])
-@jwt_required()
 def aktie_search():
     """
     Suche nach Aktien über Namen/Firma/Symbol mit yfinance.
@@ -664,7 +661,6 @@ def aktie_search():
     }), 200
 
 @api_bp.route("/aktie/trending", methods=["GET"])
-@jwt_required()
 def aktie_trending():
     """
     Liefert Trending-Aktien von Yahoo Finance.

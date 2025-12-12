@@ -1,1 +1,96 @@
-<p>home works!</p>
+<div class="home-container">
+  <div class="main-content">
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          Willkommen bei <span class="brand-highlight">Newslytics</span>
+        </h1>
+        <p class="hero-subtitle">
+          Ihr intelligenter Begleiter für Portfolio-Management und Aktienanalyse
+        </p>
+        <p class="hero-description">
+          Verwalten Sie Ihre Portfolios, verfolgen Sie Aktien in Echtzeit und nutzen Sie KI-gestützte Analysen, 
+          um bessere Investitionsentscheidungen zu treffen.
+        </p>
+        <div class="hero-actions">
+          <button class="btn-cta" routerLink="/stocks">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 20V10"/>
+              <path d="M12 20V4"/>
+              <path d="M6 20v-6"/>
+            </svg>
+            Jetzt registrieren
+          </button>
+          <button class="btn-secondary" routerLink="/stocks">
+            Aktien entdecken
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+      <h2 class="section-title">Warum Newslytics?</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+            </svg>
+          </div>
+          <h3>Portfolio-Management</h3>
+          <p>Verwalten Sie mehrere Portfolios an einem Ort. Verfolgen Sie Ihre Investitionen und Performance in Echtzeit.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23"/>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <h3>Echtzeit-Kursdaten</h3>
+          <p>Zugriff auf aktuelle Marktdaten und Aktienkurse. Bleiben Sie immer auf dem neuesten Stand.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <h3>Detaillierte Analysen</h3>
+          <p>Nutzen Sie umfassende Analysetools und Kennzahlen für fundierte Entscheidungen.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <h3>KI-Assistent</h3>
+          <p>Erhalten Sie intelligente Empfehlungen und Antworten auf Ihre Fragen durch unseren AI-Chatbot.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+      <div class="cta-content">
+        <h2>Bereit durchzustarten?</h2>
+        <p>Erstellen Sie Ihr kostenloses Konto und beginnen Sie noch heute mit intelligentem Portfolio-Management.</p>
+        <button class="btn-cta-large" routerLink="/stocks">
+          Kostenlos registrieren
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Trending Stocks Sidebar -->
+  <aside class="trending-sidebar">
+    <app-stock-homepage></app-stock-homepage>
+  </aside>
+</div>
