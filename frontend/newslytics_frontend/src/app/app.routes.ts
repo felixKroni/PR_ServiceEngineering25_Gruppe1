@@ -29,5 +29,10 @@ export const routes: Routes = [
   {
     path: 'stocks',
     loadComponent: () => import('./pages/public/stock-overview/stock-overview').then(m => m.StockOverview)
+  },
+  {
+    path: 'watchlist-detail',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/loggedIn/watchlist/watchlist-detail/watchlist-detail').then(m => m.WatchlistDetail)
   }
 ];

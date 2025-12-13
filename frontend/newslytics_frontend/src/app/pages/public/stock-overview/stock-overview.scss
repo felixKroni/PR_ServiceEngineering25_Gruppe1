@@ -30,6 +30,13 @@
     }
 }
 
+.selected-stock-layout {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.4fr) minmax(0, 0.6fr);
+    gap: 1.5rem;
+    align-items: stretch;
+}
+
 .selected-stock-card {
     background: #0b1120;
     border: 1px solid rgba(148, 163, 184, 0.25);
@@ -38,6 +45,10 @@
     box-shadow: 0 8px 24px rgba(2, 6, 23, 0.35);
     animation: fadeIn 0.3s ease;
 
+
+.chatbot-panel {
+    width: 100%;
+}
     .card-header {
         display: flex;
         justify-content: space-between;
@@ -132,6 +143,8 @@
     border-top: 1px solid rgba(148, 163, 184, 0.2);
     display: flex;
     justify-content: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
 }
 
 .btn-primary {
@@ -156,6 +169,40 @@
     }
 }
 
+.btn-secondary {
+    padding: 0.75rem 1.5rem;
+    background: rgba(148, 163, 184, 0.1);
+    color: #e2e8f0;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+        background: rgba(148, 163, 184, 0.2);
+        border-color: rgba(148, 163, 184, 0.6);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
+.watchlist-feedback {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    &.success {
+        color: #86efac;
+    }
+
+    &.error {
+        color: #fca5a5;
+    }
+}
+
 @media (max-width: 768px) {
     .stock-overview-container {
         padding: 1.5rem 1rem;
@@ -163,6 +210,10 @@
 
     .header h1 {
         font-size: 1.5rem;
+    }
+
+    .selected-stock-layout {
+        grid-template-columns: 1fr;
     }
 
     .selected-stock-card .detail-row {

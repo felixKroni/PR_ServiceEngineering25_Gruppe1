@@ -1,0 +1,17 @@
+<article class="watchlist-tile fluent-tile compact" (click)="openWatchlist()">
+    <div class="tile-header">
+        <div>
+            <p class="tile-eyebrow">Watchlist</p>
+            <h3>{{ statusText }}</h3>
+        </div>
+        <span class="portfolio-id">WL</span>
+    </div>
+
+    <button
+        type="button"
+        class="ghost primary"
+        (click)="openWatchlist(); $event.stopPropagation()"
+        [disabled]="loading">
+        Öffnen
+    </button>
+</article>

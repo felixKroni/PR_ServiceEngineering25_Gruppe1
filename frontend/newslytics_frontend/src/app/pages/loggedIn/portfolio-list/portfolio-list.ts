@@ -5,21 +5,27 @@ import { Router } from '@angular/router';
 import { PortfolioPlaceholderComponent } from '../../../components/portfolio/portfolio-placeholder.component';
 import { CreatePortfolioModalComponent } from '../../../components/portfolio/create-portfolio-modal.component';
 import { RenamePortfolioModalComponent } from '../../../components/portfolio/rename-portfolio-modal.component';
+import { WatchlistEntryComponent } from '../../../components/Watchlist/watchlist-entry.component';
 import { Portfolio } from '../../../models/portfolio';
+import { WatchlistEntry } from '../../../models/watchlist';
 import { AuthService } from '../../../services/auth.service';
 import { PortfolioService } from '../../../services/portfolio.service';
+import { WatchlistService } from '../../../services/watchlist.service';
 
 @Component({
   standalone: true,
   selector: 'app-portfolio-list',
-  imports: [CommonModule, PortfolioPlaceholderComponent, CreatePortfolioModalComponent, RenamePortfolioModalComponent],
+  imports: [CommonModule, PortfolioPlaceholderComponent, CreatePortfolioModalComponent, RenamePortfolioModalComponent, WatchlistEntryComponent],
   templateUrl: './portfolio-list.html',
   styleUrl: './portfolio-list.scss',
 })
 export class PortfolioList implements OnInit {
   portfolios: Portfolio[] = [];
+  watchlistEntries: WatchlistEntry[] = [];
   isLoading = false;
+  watchlistLoading = false;
   error: string | null = null;
+  watchlistError: string | null = null;
   showCreateModal = false;
   showRenameModal = false;
   renameTarget: Portfolio | null = null;
@@ -30,22 +36,24 @@ export class PortfolioList implements OnInit {
   constructor(
     private portfolioService: PortfolioService,
     private authService: AuthService,
+    private watchlistService: WatchlistService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.loadPortfolios();
-  }
-
-  private loadPortfolios(): void {
     const currentUser = this.authService.currentUser;
     if (!currentUser) {
       this.error = 'Leider konnten keine Nutzerdaten geladen werden.';
       return;
     }
 
+    this.loadPortfolios(currentUser.id);
+    this.loadWatchlist(currentUser.id);
+  }
+
+  private loadPortfolios(userId: number): void {
     this.isLoading = true;
-    this.portfolioService.getPortfoliosByUser(currentUser.id).subscribe({
+    this.portfolioService.getPortfoliosByUser(userId).subscribe({
       next: (data: Portfolio[]) => {
         this.portfolios = data;
         this.isLoading = false;
@@ -54,6 +62,22 @@ export class PortfolioList implements OnInit {
       error: () => {
         this.error = 'Portfolios konnten nicht geladen werden.';
         this.isLoading = false;
+      }
+    });
+  }
+
+  private loadWatchlist(userId: number): void {
+    this.watchlistLoading = true;
+    this.watchlistService.getEntriesByUser(userId).subscribe({
+      next: (entries) => {
+        this.watchlistEntries = entries;
+        this.watchlistLoading = false;
+        this.watchlistError = null;
+      },
+      error: () => {
+        this.watchlistEntries = [];
+        this.watchlistLoading = false;
+        this.watchlistError = 'Watchlist konnte nicht geladen werden.';
       }
     });
   }
@@ -73,6 +97,15 @@ export class PortfolioList implements OnInit {
 
   openPortfolio(id: number): void {
     this.router.navigate(['/portfolio', id]);
+  }
+
+  openWatchlist(): void {
+    if (this.watchlistEntries.length === 0) {
+      this.router.navigate(['/stocks']);
+      return;
+    }
+
+    this.router.navigate(['/watchlist-detail']);
   }
 
   requestRename(portfolio: Portfolio): void {

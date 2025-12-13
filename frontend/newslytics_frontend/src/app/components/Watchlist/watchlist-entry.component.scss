@@ -1,0 +1,39 @@
+.watchlist-tile {
+    cursor: pointer;
+
+    &.compact {
+        gap: 0.75rem;
+		padding: 1.15rem 1.25rem;
+    }
+
+    .tile-header {
+        margin-bottom: 0.35rem;
+    }
+
+    h3 {
+        margin: 0.15rem 0 0;
+        font-size: 1.05rem;
+    }
+
+    button {
+        align-self: flex-start;
+        cursor: pointer;
+        margin-top: 0.75rem;
+        border-radius: 6px;
+        padding: 0.45rem 1rem;
+        border: 1px solid rgba(59, 130, 246, 0.35);
+        background: rgba(59, 130, 246, 0.15);
+        color: #bfdbfe;
+        font-size: 0.85rem;
+        transition: filter 0.15s ease, opacity 0.15s ease;
+
+        &:hover:not(:disabled) {
+            filter: brightness(1.05);
+        }
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    }
+}

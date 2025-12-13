@@ -22,7 +22,6 @@ export class StockSearchbar implements OnInit {
     error: string | null = null;
     showResults = false;
 
-    //Only for testing purposes as long as the backend does not provide ISINs
     dummyISIN = true;
 
     private searchSubject = new Subject<string>();
@@ -98,7 +97,6 @@ export class StockSearchbar implements OnInit {
     }
 
     onBlur(): void {
-        // Delay to allow click events on results
         setTimeout(() => {
             this.showResults = false;
         }, 200);

@@ -35,12 +35,10 @@ export class TransactionEditModalComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Initialize form with transaction data
     this.menge = this.transaction.menge;
     this.kaufpreis = this.transaction.kaufpreis;
-    this.kaufdatum = this.transaction.kaufdatum.split('T')[0]; // Extract date part
+    this.kaufdatum = this.transaction.kaufdatum.split('T')[0];
 
-    // Load stock details
     this.loadStock();
   }
 

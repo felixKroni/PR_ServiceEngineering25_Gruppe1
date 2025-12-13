@@ -14,28 +14,41 @@
 
 	<app-rename-portfolio-modal
 		*ngIf="showRenameModal && renameTarget"
-		[currentName]="renameTarget?.name ?? ''"
+		[currentName]="renameTarget!.name"
 		[saving]="renameSaving"
 		[serverError]="renameServerError"
 		(close)="closeRenameModal()"
 		(save)="saveRename($event)">
 	</app-rename-portfolio-modal>
 
-	<div class="state" *ngIf="isLoading">Portfolios werden geladen ...</div>
-	<div class="state error" *ngIf="!isLoading && error">{{ error }}</div>
-	<div class="state state-empty" *ngIf="!isLoading && !error && portfolios.length === 0">
-		Noch keine Portfolios vorhanden. Erstelle jetzt dein erstes Portfolio!
-	</div>
+	<div class="content-layout">
+		<aside class="watchlist-column">
+			<app-watchlist-entry
+				[entryCount]="watchlistEntries.length"
+				[loading]="watchlistLoading"
+				(open)="openWatchlist()">
+			</app-watchlist-entry>
+			<p class="state error" *ngIf="watchlistError">{{ watchlistError }}</p>
+		</aside>
 
-	<div class="portfolio-grid" *ngIf="!isLoading && !error && portfolios.length > 0">
-		<app-portfolio-placeholder
-			*ngFor="let portfolio of portfolios"
-			[portfolio]="portfolio"
-			[renaming]="renameSaving && renameTarget?.id === portfolio.id"
-			[deleting]="isDeleting(portfolio.id)"
-			(open)="openPortfolio($event)"
-			(rename)="requestRename(portfolio)"
-			(delete)="handleDelete(portfolio)">
-		</app-portfolio-placeholder>
+		<div class="portfolios-column">
+			<div class="state" *ngIf="isLoading">Portfolios werden geladen ...</div>
+			<div class="state error" *ngIf="!isLoading && error">{{ error }}</div>
+			<div class="state state-empty" *ngIf="!isLoading && !error && portfolios.length === 0">
+				Noch keine Portfolios vorhanden. Erstelle jetzt dein erstes Portfolio!
+			</div>
+
+			<div class="portfolio-grid" *ngIf="!isLoading && !error && portfolios.length > 0">
+				<app-portfolio-placeholder
+					*ngFor="let portfolio of portfolios"
+					[portfolio]="portfolio"
+					[renaming]="renameSaving && (renameTarget ? renameTarget.id === portfolio.id : false)"
+					[deleting]="isDeleting(portfolio.id)"
+					(open)="openPortfolio($event)"
+					(rename)="requestRename(portfolio)"
+					(delete)="handleDelete(portfolio)">
+				</app-portfolio-placeholder>
+			</div>
+		</div>
 	</div>
 </section>

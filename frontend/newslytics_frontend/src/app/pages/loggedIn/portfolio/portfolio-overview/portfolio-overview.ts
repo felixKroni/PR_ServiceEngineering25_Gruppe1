@@ -88,8 +88,7 @@ export class PortfolioOverview implements OnInit {
   onTransactionUpdated(): void {
     this.showEditModal = false;
     this.selectedTransaction = null;
-    
-    // Reload transactions
+
     if (this.portfolio) {
       this.loadTransactions(this.portfolio.id);
     }
@@ -98,8 +97,7 @@ export class PortfolioOverview implements OnInit {
   onTransactionDeleted(): void {
     this.showEditModal = false;
     this.selectedTransaction = null;
-    
-    // Reload transactions
+
     if (this.portfolio) {
       this.loadTransactions(this.portfolio.id);
     }

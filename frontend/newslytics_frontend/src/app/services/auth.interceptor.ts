@@ -8,7 +8,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const token = authService.token;
     const isAuthEndpoint = req.url.includes('/auth/');
     
-    // Public endpoints that don't require authentication
     const publicEndpoints = [
         '/aktie/search',
         '/aktie/trending',
@@ -17,7 +16,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const isPublicEndpoint = publicEndpoints.some(endpoint => req.url.includes(endpoint));
 
     if (!token) {
-        // Only show auth required modal for non-public, non-auth endpoints
         if (!isAuthEndpoint && !isPublicEndpoint) {
             authService.notifyAuthRequired();
         }

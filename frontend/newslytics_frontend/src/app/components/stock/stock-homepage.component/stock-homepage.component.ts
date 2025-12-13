@@ -24,7 +24,7 @@ export class StockHomepage implements OnInit {
   private loadTrendingStocks(): void {
     this.stockService.getTrendingStocks('US').subscribe({
       next: (response) => {
-        this.trendingStocks = response.results.slice(0, 8); // Show top 8
+        this.trendingStocks = response.results.slice(0, 8);
         this.loading = false;
       },
       error: (err) => {

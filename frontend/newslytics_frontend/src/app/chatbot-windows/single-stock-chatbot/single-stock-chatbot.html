@@ -1,1 +1,35 @@
-<p>single-stock-chatbot works!</p>
+<section class="single-stock-chatbot">
+	<header>
+		<p class="eyebrow">Chatbot</p>
+		<h3>{{ stockTitle }}</h3>
+	</header>
+
+	<div class="chat-window" [class.disabled]="!stock">
+		<ng-container *ngIf="stock; else emptyState">
+			<div class="message" *ngFor="let message of messages" [class.user]="message.sender === 'user'">
+				<span class="sender">{{ message.sender === 'user' ? 'Du' : 'Assistant' }}</span>
+				<p>{{ message.text }}</p>
+			</div>
+		</ng-container>
+	</div>
+
+	<form class="composer" *ngIf="stock" (ngSubmit)="sendMessage()">
+		<label class="sr-only" for="chatbot-message">Chat Eingabe</label>
+		<textarea
+			id="chatbot-message"
+			[(ngModel)]="inputValue"
+			name="message"
+			rows="3"
+			[placeholder]="placeholder"
+			[disabled]="loading"></textarea>
+		<button type="submit" [disabled]="loading || !inputValue.trim()">
+			{{ loading ? 'Senden ...' : 'Senden' }}
+		</button>
+	</form>
+
+	<p class="state error" *ngIf="error">{{ error }}</p>
+
+	<ng-template #emptyState>
+		<p class="placeholder">Keine Aktie ausgewählt.</p>
+	</ng-template>
+</section>

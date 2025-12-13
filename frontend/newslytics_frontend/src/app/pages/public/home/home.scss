@@ -13,10 +13,9 @@
 }
 
 .main-content {
-  min-width: 0; // Prevent grid overflow
+  min-width: 0;
 }
 
-// Hero Section
 .hero {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 20px;
@@ -121,7 +120,6 @@
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
 
     &:hover {
       background: rgba(255, 255, 255, 0.3);
@@ -130,7 +128,6 @@
   }
 }
 
-// Features Section
 .features {
   margin-bottom: 3rem;
 
@@ -192,7 +189,6 @@
   }
 }
 
-// CTA Section
 .cta-section {
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   border-radius: 20px;
@@ -238,7 +234,6 @@
   }
 }
 
-// Trending Sidebar
 .trending-sidebar {
   @media (max-width: 1024px) {
     max-width: 600px;

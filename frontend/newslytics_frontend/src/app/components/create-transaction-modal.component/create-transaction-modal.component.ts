@@ -35,19 +35,15 @@ export class CreateTransactionModalComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Set today's date as default
     const today = new Date();
     this.kaufdatum = today.toISOString().split('T')[0];
 
-    // Get stock name
     this.stockName = this.getStockName();
 
-    // Set default price if available
     if ('regularMarketPrice' in this.stock && this.stock.regularMarketPrice) {
       this.kaufpreis = this.stock.regularMarketPrice;
     }
 
-    // Optionally check if stock exists (but don't block)
     this.checkIfStockExists();
   }
 
@@ -56,10 +52,9 @@ export class CreateTransactionModalComponent implements OnInit {
     const symbol = this.stock.ticker || this.stock.symbol;
     
     if (!isin && !symbol) {
-      return; // Will create stock when submitting
+      return;
     }
 
-    // Search for existing stock by ISIN or symbol
     this.stockService.getStocks().subscribe({
       next: (stocks) => {
         let existingStock;
@@ -67,8 +62,6 @@ export class CreateTransactionModalComponent implements OnInit {
         if (isin) {
           existingStock = stocks.find(s => s.isin === isin);
         }
-        
-        // Fallback to name if ISIN not found
         if (!existingStock && symbol) {
           existingStock = stocks.find(s => 
             s.name === symbol || s.firma === symbol
@@ -81,7 +74,6 @@ export class CreateTransactionModalComponent implements OnInit {
       },
       error: (err) => {
         console.error('Failed to check existing stocks:', err);
-        // Don't set error, just continue
       }
     });
   }
@@ -94,7 +86,6 @@ export class CreateTransactionModalComponent implements OnInit {
         return;
       }
 
-      // Create stock if it doesn't exist
       const stockData = {
         name: this.getStockName(),
         isin: this.stock.isin || 'N/A',
@@ -146,7 +137,6 @@ export class CreateTransactionModalComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    // Ensure stock exists (create if necessary) before creating transaction
     this.ensureStockExists().subscribe({
       next: (aktieId) => {
         const transaction: CreateTransactionRequest = {

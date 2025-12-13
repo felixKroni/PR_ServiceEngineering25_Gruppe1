@@ -9,12 +9,15 @@
     </div>
 
     @if (selectedStock) {
-        <div class="selected-stock-card">
-            <div class="card-header">
-                <h2>Ausgewählte Aktie</h2>
-                <button class="close-btn" (click)="selectedStock = null">×</button>
-            </div>
-            <div class="stock-details">
+        <div class="selected-stock-layout">
+            <app-single-stock-chatbot class="chatbot-panel" [stock]="selectedStock"></app-single-stock-chatbot>
+
+            <div class="selected-stock-card">
+                <div class="card-header">
+                    <h2>Ausgewählte Aktie</h2>
+                    <button class="close-btn" (click)="selectedStock = null">×</button>
+                </div>
+                <div class="stock-details">
                 <div class="detail-row">
                     <span class="label">Symbol:</span>
                     <span class="value symbol">{{ selectedStock.ticker || selectedStock.symbol }}</span>
@@ -73,14 +76,20 @@
                         <span class="value">{{ selectedStock.industry }}</span>
                     </div>
                 }
-            </div>
-            @if (isAuthenticated) {
-                <div class="card-actions">
-                    <button class="btn-primary" (click)="openPortfolioSelection()">
-                        Zum Portfolio hinzufügen
-                    </button>
                 </div>
-            }
+                @if (isAuthenticated) {
+                    <div class="card-actions">
+                        <button class="btn-secondary" (click)="addToWatchlist()" [disabled]="watchlistAdding">
+                            {{ watchlistAdding ? 'Wird hinzugefügt …' : 'Zur Watchlist hinzufügen' }}
+                        </button>
+                        <button class="btn-primary" (click)="openPortfolioSelection()">
+                            Zum Portfolio hinzufügen
+                        </button>
+                    </div>
+                    <p class="watchlist-feedback success" *ngIf="watchlistSuccess">{{ watchlistSuccess }}</p>
+                    <p class="watchlist-feedback error" *ngIf="watchlistError">{{ watchlistError }}</p>
+                }
+            </div>
         </div>
     }
 </div>

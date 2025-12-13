@@ -1,0 +1,75 @@
+<section class="watchlist-detail" *ngIf="!error; else errorTpl">
+  <div class="layout">
+    <div class="summary-column">
+      <div class="summary">
+        <p class="eyebrow">Watchlist</p>
+        <h1>Gemerkte Aktien</h1>
+        <p class="subtitle" *ngIf="entries.length > 0">{{ entries.length }} Aktien in deiner Liste.</p>
+        <p class="subtitle" *ngIf="entries.length === 0">Noch keine Aktien gemerkt. Lass dich von der Suche inspirieren.</p>
+        <button type="button" class="primary" (click)="goToStocks()">
+          Aktien durchsuchen
+        </button>
+
+        <div class="chat-status" *ngIf="chatStock as activeStock">
+          <p>Chat über {{ activeStock.name || activeStock.isin || 'ausgewählte Aktie' }}</p>
+          <button type="button" class="ghost" (click)="clearChat()">Chat schließen</button>
+        </div>
+      </div>
+
+      <app-single-stock-chatbot
+        class="summary-chatbot"
+        *ngIf="chatStock"
+        [stock]="chatStock">
+      </app-single-stock-chatbot>
+    </div>
+
+    <section class="positions">
+      <header>
+        <h2>Deine Auswahl</h2>
+      </header>
+
+      <p class="state" *ngIf="isLoading">Watchlist wird geladen ...</p>
+      <p class="state error" *ngIf="!isLoading && stocksError">{{ stocksError }}</p>
+      <p class="state state-empty" *ngIf="!isLoading && entries.length === 0">
+        Noch keine Aktien gemerkt. Öffne die Aktienübersicht und suche nach interessanten Werten.
+      </p>
+
+      <p class="state" *ngIf="!isLoading && entries.length > 0 && stocksLoading">
+        Aktieninformationen werden geladen ...
+      </p>
+
+      <div class="stocks-grid" *ngIf="!isLoading && entries.length > 0 && !stocksLoading">
+        <article class="stock-card" *ngFor="let item of items">
+          <div class="stock-name">{{ item.stock?.name ?? 'Unbekannte Aktie' }}</div>
+          <p class="stock-identifier">ISIN - {{ item.stock?.isin ?? 'keine Angabe' }}</p>
+          <p class="stock-company" *ngIf="item.stock?.firma">{{ item.stock?.firma }}</p>
+          <p class="stock-meta" *ngIf="item.stock?.currency">Währung - {{ item.stock?.currency }}</p>
+          <div class="card-actions">
+            <button
+              type="button"
+              class="chat"
+              (click)="startChat(item.stock)"
+              [disabled]="!item.stock">
+              {{ isActiveChat(item.stock) ? 'Chat schließen' : 'Über Aktie chatten' }}
+            </button>
+            <button
+              type="button"
+              class="danger"
+              (click)="removeEntry(item.entry)"
+              [disabled]="isRemoving(item.entry.id)">
+              {{ isRemoving(item.entry.id) ? 'Entfernen ...' : 'Entfernen' }}
+            </button>
+          </div>
+        </article>
+
+        <p class="state muted" *ngIf="items.length === 0">
+          Es konnten keine passenden Aktieninformationen geladen werden.
+        </p>
+      </div>
+    </section>
+  </div>
+</section>
+
+<ng-template #errorTpl>
+  <p class="state error">{{ error }}</p>
+</ng-template>

@@ -8,6 +8,12 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		h2 {
+			font-size: 2rem;
+			font-weight: 700;
+			color: #1e293b;
+			margin: 0;
+		}
 		button.primary {
 			border: 1px solid rgba(99, 102, 241, 0.5);
 			border-radius: 8px;
@@ -39,9 +45,50 @@
 		}
 	}
 
+	.content-layout {
+		margin-top: 1rem;
+		display: grid;
+		grid-template-columns: minmax(220px, 280px) 1fr;
+		gap: 1.5rem;
+		align-items: flex-start;
+	}
+
+	.watchlist-column {
+		position: sticky;
+		top: 1rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		align-self: flex-start;
+
+		app-watchlist-entry {
+			width: 100%;
+		}
+
+		.state {
+			margin: 0;
+		}
+	}
+
+	.portfolios-column {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
 	.portfolio-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 		gap: 1rem;
+	}
+
+	@media (max-width: 900px) {
+		.content-layout {
+			grid-template-columns: 1fr;
+		}
+
+		.watchlist-column {
+			position: static;
+		}
 	}
 }

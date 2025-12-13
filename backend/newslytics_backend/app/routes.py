@@ -516,6 +516,43 @@ def chat_entry_detail(chat_id, entry_id):
     return jsonify({"message": f"Chat entry {entry_id} in chat {chat_id} deleted"}), 200
 
 
+@api_bp.route("/chatbot/stock", methods=["POST"])
+def chatbot_stock_assistant():
+    data = get_json()
+    message = (data.get("message") or "").strip()
+    stock_payload = data.get("stock") or {}
+    history = data.get("history") or []
+
+    if not message:
+        abort(400, description="Field 'message' is required")
+
+    symbol = (
+        stock_payload.get("symbol")
+        or stock_payload.get("ticker")
+        or stock_payload.get("isin")
+        or "dieser Aktie"
+    )
+    display_name = (
+        stock_payload.get("name")
+        or stock_payload.get("shortName")
+        or stock_payload.get("longName")
+        or symbol
+    )
+
+    # Dummy response that references latest user input and current stock context
+    summary_hint = "" if not history else " Ich berücksichtige den bisherigen Verlauf."
+    stock_descriptor = f"{display_name} ({symbol})" if display_name != symbol else display_name
+    reply = (
+        f"Zu {stock_descriptor}: Ich kann dir einen allgemeinen Hinweis geben. "
+        f"Deine Frage war: '{message}'.{summary_hint}"
+    )
+
+    return jsonify({
+        "reply": reply,
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+    }), 200
+
+
 # ======================
 #      Market-Data
 # ======================
